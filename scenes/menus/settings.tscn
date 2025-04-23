@@ -1,0 +1,88 @@
+[gd_scene load_steps=6 format=3 uid="uid://x5powlsydw4s"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://theme.tres" id="1_del6v"]
+[ext_resource type="Script" uid="uid://cdq777bonnjua" path="res://src/Menus/Settings.cs" id="2_erjg3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g2810"]
+bg_color = Color(0.0784314, 0.8, 0.368627, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 24.0
+expand_margin_top = 5.0
+expand_margin_right = 24.0
+expand_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erjg3"]
+bg_color = Color(0.0338468, 0.426956, 0.186025, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 24.0
+expand_margin_top = 5.0
+expand_margin_right = 24.0
+expand_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e7wif"]
+bg_color = Color(0.0784314, 0.8, 0.368627, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 24.0
+expand_margin_top = 5.0
+expand_margin_right = 24.0
+expand_margin_bottom = 5.0
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_del6v")
+script = ExtResource("2_erjg3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -124.0
+offset_top = -61.5
+offset_right = 124.0
+offset_bottom = 61.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Settings"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -22.5
+offset_top = -40.0
+offset_right = 22.5
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 64
+
+[node name="Button" type="Button" parent="MarginContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+theme_override_styles/hover = SubResource("StyleBoxFlat_g2810")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_erjg3")
+theme_override_styles/normal = SubResource("StyleBoxFlat_e7wif")
+text = "Back"
