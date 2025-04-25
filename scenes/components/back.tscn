@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxvjb10ecgonm"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_qp65a"]
+
+[node name="Back" type="MarginContainer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -74.0
+offset_top = -88.0
+offset_right = 74.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 128
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 2
+theme = ExtResource("1_qp65a")
+theme_override_font_sizes/font_size = 32
+text = "Back"

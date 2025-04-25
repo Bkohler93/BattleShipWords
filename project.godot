@@ -15,10 +15,18 @@ run/main_scene="uid://dq6yyn0lbt05n"
 config/features=PackedStringArray("4.4", "C#", "Mobile")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Config="*res://src/Config.cs"
+
 [display]
 
-window/size/viewport_width=1080
-window/size/viewport_height=1920
+window/size/viewport_width=720
+window/size/viewport_height=1080
+window/size/resizable=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [dotnet]
 
@@ -27,3 +35,4 @@ project/assembly_name="Battleship With Words"
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

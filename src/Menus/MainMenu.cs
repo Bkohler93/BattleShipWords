@@ -8,19 +8,21 @@ public partial class MainMenu : Control
     public Action OnMultiplayerButtonPressed;
     public Action OnSettingsButtonPressed;
     public Action OnQuitButtonPressed;
-
+    
+    [Export]
     private Button _singlePlayerButton;
+    
+    [Export]
     private Button _multiplayerButton;
+    
+    [Export]
     private Button _settingsButton;
+    
+    [Export]
     private Button _quitButton;
     
     public override void _Ready()
     {
-        _singlePlayerButton = GetNode<Button>("VBoxContainer3/VBoxContainer2/SinglePlayerButton");
-        _multiplayerButton = GetNode<Button>("VBoxContainer3/VBoxContainer2/MultiplayerButton");
-        _settingsButton = GetNode<Button>("VBoxContainer3/VBoxContainer2/SettingsButton");
-        _quitButton = GetNode<Button>("VBoxContainer3/VBoxContainer2/QuitButton");
-        
         _singlePlayerButton.Pressed += OnSinglePlayerButtonPressed;
         _multiplayerButton.Pressed += OnMultiplayerButtonPressed;
         _settingsButton.Pressed += OnSettingsButtonPressed;

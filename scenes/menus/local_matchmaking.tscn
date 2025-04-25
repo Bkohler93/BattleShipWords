@@ -1,0 +1,97 @@
+[gd_scene load_steps=4 format=3 uid="uid://dujsg5htcl8ut"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_43emd"]
+[ext_resource type="Script" uid="uid://b3vvuh8a0ui2m" path="res://src/Menus/LocalMatchmaking.cs" id="1_a1au5"]
+[ext_resource type="Theme" uid="uid://drsk0qym5xtx0" path="res://themes/back_button.tres" id="3_l0jvm"]
+
+[node name="LocalMatchmaking" type="MarginContainer" node_paths=PackedStringArray("_backButton", "_playButton", "_statusLabel", "_updateLabel")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_43emd")
+script = ExtResource("1_a1au5")
+_backButton = NodePath("VBoxContainer/Control3/BackButton")
+_playButton = NodePath("VBoxContainer/Control2/PlayButton")
+_statusLabel = NodePath("VBoxContainer/Control/VBoxContainer/StatusLabel")
+_updateLabel = NodePath("VBoxContainer/Control/VBoxContainer/UpdateLabel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Control4" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -265.5
+offset_right = 265.5
+offset_bottom = 175.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Local Multiplayer"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "searching the network for other players"
+horizontal_alignment = 1
+
+[node name="UpdateLabel" type="Label" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayButton" type="Button" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_43emd")
+text = "Play"
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="VBoxContainer/Control3"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -27.5
+offset_top = -17.0
+offset_right = 27.5
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_l0jvm")
+text = "Back"

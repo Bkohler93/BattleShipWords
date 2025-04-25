@@ -2,4 +2,4 @@ set -e
 
 dotnet build
 
-godot --path .
+godot --path . --srcUdp=$1 --destUdp=$2 --tcp=$3

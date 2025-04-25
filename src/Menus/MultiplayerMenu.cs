@@ -1,16 +1,19 @@
 using Godot;
 using System;
-using BattleshipWithWords.Services;
 
-
-public partial class Settings : Control
+public partial class MultiplayerMenu : Control
 {
     [Export]
     private Button _backButton;
+    
+    [Export]
+    private Button _localPlayButton;
     public Action OnBackButtonPressed;
-
+    public Action OnLocalButtonPressed;
+    
     public override void _Ready()
     {
         _backButton.Pressed += OnBackButtonPressed;
+        _localPlayButton.Pressed += OnLocalButtonPressed;
     }
 }

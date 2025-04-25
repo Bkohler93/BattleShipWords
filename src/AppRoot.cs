@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using BattleshipWithWords;
 using BattleshipWithWords.Services;
 
 public partial class AppRoot : Control
@@ -9,6 +10,9 @@ public partial class AppRoot : Control
     private AppManager _appManager;
     public override void _Ready()
     {
+        var config = GetNode("/root/Config") as Config;
+        config.ParseConfig(OS.GetCmdlineArgs()); 
+        
         var sceneRoot = GetNode("SceneRoot");
         var uiRoot = GetNode("UIRoot");
         _appManager = new AppManager(new SceneManager(sceneRoot), new UIManager(uiRoot));

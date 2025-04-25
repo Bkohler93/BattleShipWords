@@ -1,10 +1,13 @@
 using Godot;
 using System;
+using BattleshipWithWords.Games;
 
-public partial class Tutorial : Control
+public partial class Tutorial : Control, IGame
 {
     private Label _label;
-    public Action TutorialDone;
+    public Action OnPause { get; set; }
+    public Action OnFinish { get; set; }
+    public Action OnQuit { get; set; }
 
     public override void _Ready()
     {
@@ -12,6 +15,7 @@ public partial class Tutorial : Control
         var timer = new Timer();
         AddChild(timer);
         timer.Start(5);
-        timer.Timeout += TutorialDone;
+        timer.Timeout += OnFinish;
     }
+
 }

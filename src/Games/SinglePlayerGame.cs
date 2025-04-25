@@ -1,11 +1,13 @@
 using Godot;
 using System;
+using BattleshipWithWords.Games;
 
-public partial class SinglePlayerGame : Control
+public partial class SinglePlayerGame : Control, IGame
 {
     private Button _pauseButton;
-    public Action OnPause;
-    public Action OnFinish;
+    public Action OnPause { get; set; }
+    public Action OnFinish { get; set; }
+    public Action OnQuit { get; set; }
 
     public override void _Ready()
     {
@@ -16,4 +18,5 @@ public partial class SinglePlayerGame : Control
         timer.Start(5);
         timer.Timeout += OnFinish;
     }
+
 }

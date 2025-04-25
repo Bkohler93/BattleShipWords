@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Godot;
 
 namespace BattleshipWithWords.Services;
@@ -58,7 +59,7 @@ public class TutorialScene : IScene
     public Node Enter()
     {
         var tutorial = ResourceLoader.Load<PackedScene>("res://scenes/games/tutorial.tscn").Instantiate() as Tutorial;
-        tutorial!.TutorialDone = () =>
+        tutorial!.OnFinish = () =>
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager));
         };
@@ -87,11 +88,11 @@ public class MainMenuScene : IScene
         var mainMenu = ResourceLoader.Load<PackedScene>("res://scenes/menus/main_menu.tscn").Instantiate() as MainMenu;
         mainMenu!.OnSinglePlayerButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new SinglePlayerScene(_sceneManager, _uiManager));
+            _sceneManager.TransitionTo(new SinglePlayerGameScene(_sceneManager, _uiManager));
         };
         mainMenu.OnMultiplayerButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new MultiplayerScene(_sceneManager, _uiManager));
+            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _uiManager));
         };
         mainMenu.OnSettingsButtonPressed = () =>
         {
@@ -132,11 +133,11 @@ public class SettingsScene : IScene
     }
 }
 
-public class SinglePlayerScene : IScene
+public class SinglePlayerGameScene : IScene
 {
     private SceneManager _sceneManager;
     private UIManager _uiManager;
-    public SinglePlayerScene(SceneManager sceneManager, UIManager uiManager)
+    public SinglePlayerGameScene(SceneManager sceneManager, UIManager uiManager)
     {
         _sceneManager = sceneManager;
         _uiManager = uiManager;
@@ -162,12 +163,12 @@ public class SinglePlayerScene : IScene
     }
 }
 
-public class MultiplayerScene : IScene
+public class MultiplayerGameScene : IScene
 {
     private SceneManager _sceneManager;
     private UIManager _uiManager;
 
-    public MultiplayerScene(SceneManager sceneManager, UIManager uiManager)
+    public MultiplayerGameScene(SceneManager sceneManager, UIManager uiManager)
     {
         _sceneManager = sceneManager;
         _uiManager = uiManager;
@@ -183,12 +184,102 @@ public class MultiplayerScene : IScene
         var multiplayerGame = ResourceLoader.Load<PackedScene>("res://scenes/games/single_player_game.tscn").Instantiate() as SinglePlayerGame;
         multiplayerGame!.OnPause = () =>
         {
-            GD.Print("show pause overlay");
         };
         multiplayerGame.OnFinish = () =>
         {
             GD.Print("show finish overlay");
         };
         return multiplayerGame;
+    }
+}
+
+public class InternetMatchmakingScene : IScene
+{
+    private SceneManager _sceneManager;
+    private UIManager _uiManager;
+
+    public InternetMatchmakingScene(SceneManager sceneManager, UIManager uiManager)
+    {
+        _sceneManager = sceneManager;
+        _uiManager = uiManager;
+    }
+
+    public void Exit()
+    {
+        // throw new System.NotImplementedException();
+    }
+
+    public Node Enter()
+    {
+        GD.Print("Entered internet matchmaking state");
+        var matchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/internet_matchmaking.tscn").Instantiate() as InternetMatchmaking;
+        matchmaking!.OnCancelButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager));
+        };
+            
+        return matchmaking;
+    }
+}
+
+public class MultiplayerMenuScene: IScene
+{
+    private SceneManager _sceneManager;
+    private UIManager _uiManager;
+
+    public MultiplayerMenuScene(SceneManager sceneManager, UIManager uiManager)
+    {
+        _sceneManager = sceneManager;
+        _uiManager = uiManager;
+    }
+
+    public void Exit()
+    {
+        GD.Print("Exiting multiplayer menu");
+    }
+
+    public Node Enter()
+    {
+        var multiplayerMenu = ResourceLoader.Load<PackedScene>("res://scenes/menus/multiplayer.tscn").Instantiate() as MultiplayerMenu;
+        multiplayerMenu!.OnBackButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager));
+        };
+        multiplayerMenu.OnLocalButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new LocalMatchmakingScene(_sceneManager, _uiManager));
+        };
+        return multiplayerMenu;
+    }
+}
+
+public class LocalMatchmakingScene : IScene
+{
+    private SceneManager _sceneManager;
+    private UIManager _uiManager;
+
+    public LocalMatchmakingScene(SceneManager sceneManager, UIManager uiManager)
+    {
+        _sceneManager = sceneManager;
+        _uiManager = uiManager;
+    }
+
+    public void Exit()
+    {
+        GD.Print("Exiting local matchmaking scene");
+    }
+
+    public Node Enter()
+    {
+        var localMatchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/local_matchmaking.tscn").Instantiate() as LocalMatchmaking;
+        localMatchmaking.OnBackButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _uiManager));
+        };
+        localMatchmaking.OnPlayButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new MultiplayerGameScene(_sceneManager, _uiManager));
+        };
+        return localMatchmaking;
     }
 }
