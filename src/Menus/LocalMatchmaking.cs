@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Net.Quic;
 using System.Runtime.InteropServices;
 using BattleshipWithWords;
+using BattleshipWithWords.Networkutils;
+using Godot.Collections;
 
 public partial class LocalMatchmaking : Control
 {
@@ -27,7 +29,6 @@ public partial class LocalMatchmaking : Control
     private PacketPeerUdp _discoveryPeer;
     private  ENetMultiplayerPeer _multiplayerPeer;
     
-    
     private bool _peerFound;
     private bool _connected;
     private bool _listening;
@@ -37,11 +38,17 @@ public partial class LocalMatchmaking : Control
     private int _udpPort = 55531;
     private int _tcpPort = 55532;
     
-    // two ports below only used when testing on same system and two separate dst/src ports are required.
+    // two ports below only used when testing locally on same system and two separate dst/src ports are required.
     private int _dstUdpPort;
     private int _dstTcpPort;
+    
     private string _peerIp;
     private string _ip;
+    
+    //platform specific
+    private GodotObject _androidPlugin;
+    private GodotObject _helloPlugin;
+    private bool _isAndroid;
 
     public override void _ExitTree()
     {
@@ -60,59 +67,94 @@ public partial class LocalMatchmaking : Control
         OnPlayButtonPressed?.Invoke();
     }
 
+    private void _onDiscoveryResult(Dictionary result)
+    {
+        if (result.ContainsKey("error"))
+        {
+            GD.PrintErr("Discovery error: ", result["error"]);
+        }
+        else
+        {
+            var ip = result["ip"].ToString();
+            var port = (int)result["port"];
+            _updateLabel.Text = $"Found peer at {ip}:{port}";
+            GD.Print($"Discovered peer at {ip}:{port}");
+        }
+    }
+
     public override void _Ready()
     {
         _backButton.Pressed += _onBackButtonPressed;
         _playButton.Pressed += _onPlayButtonPressed;
         _playButton.Hide();
+
+        if (OS.GetName() == "Android")
+            _isAndroid = true;
         
-        var config = GetNode("/root/Config") as Config;
-        _dstUdpPort = _udpPort;
-        int srcUdpPort = _udpPort;
-        
-        if (config!.AreLocalUdpPortsSet())
+        if (Engine.HasSingleton("GodotAndroidPluginTemplate"))
         {
-            _dstUdpPort = config.LocalDstUdpPort;
-            srcUdpPort = config.LocalSrcUdpPort;
-            _tcpPort = config.LocalTcpPort;
+            _helloPlugin = Engine.GetSingleton("GodotAndroidPluginTemplate");
+            _helloPlugin.Call("helloWorld");
+        }
+        else
+        {
+            GD.Print("No HelloPlugin found");
         }
 
-        _ip = GetLocalIp();
-        _discoveryPeer = new PacketPeerUdp();
-        _discoveryPeer.SetBroadcastEnabled(true);
-        _discoveryPeer.SetDestAddress("255.255.255.255", _dstUdpPort);
-        _statusLabel.Text = "Searching for local game";
-        
-        var err = _discoveryPeer.Bind(srcUdpPort);
-        if (err != Error.Ok)
+        GD.Print(Engine.GetSingletonList());
+        GD.Print(Engine.HasSingleton("GodotAndroidMdns"));
+        if (_isAndroid && Engine.HasSingleton("GodotAndroidMdns"))
         {
-            _statusLabel.Text = "There was an issue searching for local game";
-            _failedToConnect = true;
-        }
+            _androidPlugin = Engine.GetSingleton("GodotAndroidMdns");
 
-        // GD.Print($"Listening on {srcUdpPort} --- sending on {_dstUdpPort}");
+            // Connect the discovery_result signal
+            _androidPlugin.Connect("discovery_result", new Callable(this, nameof(_onDiscoveryResult)));
+
+            // Start discovery
+            var result = (Godot.Collections.Dictionary)_androidPlugin.Call("start_discovery");
+            GD.Print("Discovery started: ", result); 
+            _statusLabel.Text = $"Discovery started: {result}";
+        }
+        else if(_isAndroid)
+        {
+            _statusLabel.Text = "Plugin not found";
+        }
+        else
+        {
+            // in prod single udp port is used, testing/local execution requires two 
+            // different ports to communicate with each other with same IP address
+            _dstUdpPort = _udpPort;
+            int srcUdpPort = _udpPort;
+        
+            var config = GetNode("/root/Config") as Config;
+            if (config!.UseLocalNetworking())
+            {
+                _dstUdpPort = config.LocalDstUdpPort;
+                srcUdpPort = config.LocalSrcUdpPort;
+                _tcpPort = config.LocalTcpPort;
+            }
+
+            _ip = NetworkUtils.GetLocalIp();
+            _discoveryPeer = new PacketPeerUdp();
+            _discoveryPeer.SetBroadcastEnabled(true);
+            _discoveryPeer.SetDestAddress("255.255.255.255", _dstUdpPort);
+            _statusLabel.Text = "Searching for local game";
+        
+            var err = _discoveryPeer.Bind(srcUdpPort);
+            if (err != Error.Ok)
+            {
+                _statusLabel.Text = "There was an issue searching for local game:" + err;
+                _failedToConnect = true;
+            }
+            // GD.Print($"Listening on {srcUdpPort} --- sending on {_dstUdpPort}");
+        }
     }
     
-    private string GetLocalIp()
-    {
-        foreach (string ip in IP.GetLocalAddresses())
-        {
-            if (System.Net.IPAddress.TryParse(ip, out var parsedIp))
-            {
-                // Check it's IPv4 and not a loopback address
-                if (parsedIp.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
-                    !ip.StartsWith("127."))
-                {
-                    return ip;
-                }
-            }
-        }
-
-        return "Unable to determine local IP";
-    }
 
     public override void _Process(double delta)
     {
+        if (_isAndroid)
+            return;
         if (_failedToConnect || _success) return;
         
         _sendAccumulator += delta;

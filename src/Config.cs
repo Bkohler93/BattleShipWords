@@ -27,7 +27,7 @@ public partial class Config: Node
       }
    }
 
-   public bool AreLocalUdpPortsSet()
+   public bool UseLocalNetworking()
    {
       return LocalSrcUdpPort != 0 && LocalDstUdpPort != 0;
    }
