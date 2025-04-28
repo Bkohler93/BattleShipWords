@@ -34,7 +34,7 @@ project/assembly_name="Battleship With Words"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/GodotAndroidMdns/plugin.cfg", "res://addons/GodotAndroidPluginTemplate/plugin.cfg")
+enabled=PackedStringArray("res://addons/GodotAndroidPeerFinder/plugin.cfg")
 
 [rendering]
 

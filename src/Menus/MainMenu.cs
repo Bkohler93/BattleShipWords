@@ -28,4 +28,9 @@ public partial class MainMenu : Control
         _settingsButton.Pressed += OnSettingsButtonPressed;
         _quitButton.Pressed += OnQuitButtonPressed;
     }
+
+    public override void _ExitTree()
+    {
+        GD.Print("Exiting...");
+    }
 }

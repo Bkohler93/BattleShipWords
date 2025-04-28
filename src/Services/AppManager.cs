@@ -1,3 +1,6 @@
+using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Services.Scenes;
+
 namespace BattleshipWithWords.Services;
 
 public class AppManager
@@ -13,11 +16,11 @@ public class AppManager
 
     public void PlayTutorial()
     {
-        _sceneManager.TransitionTo(new TutorialScene(_sceneManager, _uiManager));
+        _sceneManager.TransitionTo(new TutorialScene(_sceneManager, _uiManager), TransitionDirection.Forward);
     }
 
     public void Start()
     {
-        _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager));
+        _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager), TransitionDirection.Forward);
     }
 }

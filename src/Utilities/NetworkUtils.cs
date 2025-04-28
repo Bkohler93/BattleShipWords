@@ -22,4 +22,20 @@ public class NetworkUtils
 
       return "";
    }
+   
+   public static int FindAvailablePort(int startPort, int maxTries = 100)
+   {
+      var tcpServer = new TcpServer();
+      for (int i = 0; i < maxTries; i++)
+      {
+         int port = startPort + i;
+         Error err = tcpServer.Listen((ushort)port);
+         if (err == Error.Ok)
+         {
+            tcpServer.Stop(); // Free the port immediately
+            return port;
+         }
+      }
+      return -1; // No available port found
+   }
 }

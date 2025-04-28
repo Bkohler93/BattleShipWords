@@ -60,7 +60,7 @@ offset_bottom = 141.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 40
+theme_override_constants/separation = 72
 
 [node name="MultiplayerButton" type="Button" parent="VBoxContainer3/BottomSpacer/VBoxContainer"]
 layout_mode = 2

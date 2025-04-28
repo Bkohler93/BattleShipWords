@@ -5,6 +5,7 @@
     <RootNamespace>BattleshipWithWords</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="android\" />
     <Folder Include="scenes\" />
   </ItemGroup>
 </Project>
