@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://bw1efiabjkbj5"]
 
-[ext_resource type="Script" uid="uid://ctwcjda7rx7hn" path="res://src/Menus/InternetMatchmaking.cs" id="1_yhnyd"]
+[ext_resource type="Script" uid="uid://ctwcjda7rx7hn" path="res://src/Nodes/Menus/InternetMatchmaking.cs" id="1_yhnyd"]
 [ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="2_3jbm1"]
-[ext_resource type="Theme" uid="uid://drsk0qym5xtx0" path="res://themes/back_button.tres" id="3_3jbm1"]
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="3_3jbm1"]
 
 [node name="InternetMatchmaking" type="MarginContainer" node_paths=PackedStringArray("_cancelButton", "_statusLabel", "_infoLabel")]
 anchors_preset = 15

@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://d0ewewj0aicj0"]
 
-[ext_resource type="Script" uid="uid://b0e7hrn76vle2" path="res://src/Menus/MultiplayerMenu.cs" id="1_kvkvu"]
 [ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_rtqs1"]
+[ext_resource type="Script" uid="uid://b0e7hrn76vle2" path="res://src/Nodes/Menus/MultiplayerMenu.cs" id="2_kvkvu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_etamx"]
 content_margin_left = 48.0
@@ -52,7 +52,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_rtqs1")
-script = ExtResource("1_kvkvu")
+script = ExtResource("2_kvkvu")
 _backButton = NodePath("VBoxContainer2/Control3/BackButton")
 _localPlayButton = NodePath("VBoxContainer2/Control2/LocalButton")
 
