@@ -13,17 +13,17 @@ public class IdleState : ITileState
 
     public override void Enter()
     {
-        //Display Idle StyleBox
+        _controller.DisplayStyleBox("idle");
     }
 
     public override void Exit()
     {
     }
 
-    public override void Select(bool hasConflict)
-    {
-        _controller.TransitionTo(new SelectedState(_controller, hasConflict));
-    }
+    // public override void Select(bool hasConflict)
+    // {
+    //     _controller.TransitionTo(new SelectedState(_controller, hasConflict));
+    // }
 
     public override void Predict(bool hasConflict, bool isValid, string letter)
     {

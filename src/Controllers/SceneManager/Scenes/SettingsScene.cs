@@ -6,13 +6,13 @@ namespace BattleshipWithWords.Services.Scenes;
 public class SettingsScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private Settings _settings;
 
-    public SettingsScene(SceneManager sceneManager, UIManager uiManager)
+    public SettingsScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -29,7 +29,7 @@ public class SettingsScene : IScene
         var settings = ResourceLoader.Load<PackedScene>("res://scenes/menus/settings.tscn").Instantiate() as Settings;
         settings!.OnBackButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager), TransitionDirection.Backward);
+            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
         _settings = settings;
         return settings;

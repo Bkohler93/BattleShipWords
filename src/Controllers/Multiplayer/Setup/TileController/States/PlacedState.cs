@@ -12,10 +12,16 @@ public class PlacedState: ITileState
     public override void Enter()
     {
         //TODO display Placed stylebox
+        _controller.DisplayStyleBox("placed");
     }
 
     public override void Exit()
     {
+    }
+
+    public override void SetPlaceable()
+    {
+        _controller.TransitionTo(new PlaceableState(_controller, this));
     }
 
     public override void Predict(bool hasConflict, bool isValid, string letter)

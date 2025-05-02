@@ -29,10 +29,10 @@ public class TileController
         TransitionTo(new IdleState(this));
     }
 
-    public void HandleSelect(bool hasConflict)
-    {
-        _currentState?.Select(hasConflict);
-    }
+    // public void HandleSelect(bool hasConflict)
+    // {
+    //     _currentState?.Select(hasConflict);
+    // }
 
     public void HandleRelease()
     {
@@ -63,6 +63,16 @@ public class TileController
     {
         _tileNode.LetterLabel.Text = letter;
     }
+
+    public void DisplayStyleBox(string name)
+    {
+        _tileNode.ChangeToStyleBox(name);
+    }
+
+    public void HandleSetPlaceable()
+    {
+        _currentState?.SetPlaceable();
+    }
 }
 
 public abstract class ITileState
@@ -75,10 +85,10 @@ public abstract class ITileState
         throw new Exception($"TileState: {this} - should not call Release()");
     }
 
-    public virtual void Select(bool hasConflict)
-    {
-        throw new Exception($"TileState: {this}  - should not have called Select");
-    }
+    // public virtual void Select(bool hasConflict)
+    // {
+    //     throw new Exception($"TileState: {this}  - should not have called Select");
+    // }
 
     public virtual void Predict(bool hasConflict, bool isValid, string letter)
     {
@@ -88,5 +98,10 @@ public abstract class ITileState
     public virtual void Retract()
     {
         throw new Exception($"TileState: {this}  - should not have called Retract");
+    }
+
+    public virtual void SetPlaceable()
+    {
+        throw new Exception($"TileState: {this} - should not call SetPlaceable");
     }
 }

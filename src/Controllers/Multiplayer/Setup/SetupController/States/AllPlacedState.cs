@@ -22,7 +22,7 @@ public class AllPlacedState: SetupState
     {
         _controller.OnNextWordsButtonPressed();
     }
-
+    
     public override void HandlePreviousWordsButton()
     {
         _controller.OnPreviousWordsButtonPressed();

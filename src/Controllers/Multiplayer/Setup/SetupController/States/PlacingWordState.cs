@@ -23,7 +23,8 @@ public class PlacingWordState : SetupState
 
     public override void Enter()
     {
-        _controller.PredictSelectedWordPlacement(_originatingFromTile, _placementDirection);
+        _controller.RemoveOtherDirectionPlacements(_originatingFromTile.Col, _originatingFromTile.Row, _placementDirection);
+        _controller.SetWordToPlaceable(_originatingFromTile.Col, _originatingFromTile.Row, _placementDirection);
     }
 
     public override void Exit()
@@ -36,32 +37,38 @@ public class PlacingWordState : SetupState
 
         if (@event is InputEventScreenTouch { Pressed: false })
         {
-            if (_controller.TryPlaceSelectedWord(_originatingFromTile, _placementDirection))
-            {
-                if (_controller.AllWordsPlaced())
-                    _controller.TransitionTo(new AllPlacedState(_controller));
-            }
-            _controller.TransitionTo(new WordSelectedState(_controller));
+            _controller.ConfirmPlacements(_originatingFromTile.Col, _originatingFromTile.Row, _placementDirection);
+            if (_controller.AllWordsPlaced())
+                _controller.TransitionTo(new AllPlacedState(_controller));
+            else
+                _controller.TransitionTo(new InitialState(_controller));
+            // if (_controller.TryPlaceSelectedWord(_originatingFromTile, _placementDirection))
+            // {
+            //     if (_controller.AllWordsPlaced())
+            //         _controller.TransitionTo(new AllPlacedState(_controller));
+            // }
+            // _controller.TransitionTo(new WordSelectedState(_controller));
         } else if (@event is InputEventScreenDrag drag)
         {
             _distanceTraveled += drag.Relative;
             if (_distanceTraveled.X < _placementThreshold.X && _distanceTraveled.Y < _placementThreshold.Y)
             {
-                _controller.RetractPreviousPrediction(_originatingFromTile, _placementDirection); 
-                _controller.TransitionTo(new TileSelectedState(_controller, _originatingFromTile));
+                // _controller.RetractPreviousPrediction(_originatingFromTile, _placementDirection); 
+                _controller.RetractPlaceableTiles(_originatingFromTile.Col, _originatingFromTile.Row, _placementDirection);
+                _controller.TransitionTo(new StartingTileSelectedState(_controller, _originatingFromTile));
             }
             
-            if (drag.Relative.X > _directionSensitivity && _placementDirection != PlacementDirection.Right)
-            {
-                _controller.RetractPreviousPrediction(_originatingFromTile, PlacementDirection.Down);
-                _placementDirection = PlacementDirection.Right;
-                _controller.PredictSelectedWordPlacement(_originatingFromTile, _placementDirection);
-            } else if (drag.Relative.Y > _directionSensitivity && _placementDirection != PlacementDirection.Down)
-            {
-                _controller.RetractPreviousPrediction(_originatingFromTile, PlacementDirection.Right);
-                _placementDirection = PlacementDirection.Down;
-                _controller.PredictSelectedWordPlacement(_originatingFromTile, _placementDirection);
-            }        
+            // if (drag.Relative.X > _directionSensitivity && _placementDirection != PlacementDirection.Right)
+            // {
+            //     _controller.RetractPreviousPrediction(_originatingFromTile, PlacementDirection.Down);
+            //     _placementDirection = PlacementDirection.Right;
+            //     _controller.PredictSelectedWordPlacement(_originatingFromTile, _placementDirection);
+            // } else if (drag.Relative.Y > _directionSensitivity && _placementDirection != PlacementDirection.Down)
+            // {
+            //     _controller.RetractPreviousPrediction(_originatingFromTile, PlacementDirection.Right);
+            //     _placementDirection = PlacementDirection.Down;
+            //     _controller.PredictSelectedWordPlacement(_originatingFromTile, _placementDirection);
+            // }        
         }
     }
 }

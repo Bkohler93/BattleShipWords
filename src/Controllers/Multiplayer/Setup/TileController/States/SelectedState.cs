@@ -31,10 +31,10 @@ public class SelectedState : ITileState
     {
     }
 
-    public override void Select(bool hasConflict)
-    {
-        GD.Print("re-selecting a selected tile... shouldn't happen too often");
-    }
+    // public override void Select(bool hasConflict)
+    // {
+    //     GD.Print("re-selecting a selected tile... shouldn't happen too often");
+    // }
 
     public override void Release()
     {

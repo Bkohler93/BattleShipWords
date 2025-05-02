@@ -7,14 +7,14 @@ namespace BattleshipWithWords.Services.Scenes;
 public class MultiplayerTurnDeciderScene : IScene
 {
     private MultiplayerGameManager _gameManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private SceneManager _sceneManager;
     private MultiplayerTurnDecider _node;
 
-    public MultiplayerTurnDeciderScene(MultiplayerGameManager gameManager, SceneManager sceneManager, UIManager uiManager)
+    public MultiplayerTurnDeciderScene(MultiplayerGameManager gameManager, SceneManager sceneManager, OverlayManager overlayManager)
     {
         _gameManager = gameManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
         _sceneManager = sceneManager;
     }
 

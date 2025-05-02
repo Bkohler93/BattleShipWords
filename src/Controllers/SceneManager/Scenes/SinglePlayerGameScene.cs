@@ -6,12 +6,12 @@ namespace BattleshipWithWords.Services.Scenes;
 public class SinglePlayerGameScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private SinglePlayerGame _singlePlayerGame;
-    public SinglePlayerGameScene(SceneManager sceneManager, UIManager uiManager)
+    public SinglePlayerGameScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween, TransitionDirection direction)

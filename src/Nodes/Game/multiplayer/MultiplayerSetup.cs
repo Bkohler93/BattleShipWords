@@ -1,6 +1,9 @@
+using System;
+using System.Reflection;
 using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Controllers.Multiplayer.Setup.States;
 using Godot;
+using Godot.Collections;
 
 public partial class MultiplayerSetup : MarginContainer
 {
@@ -15,6 +18,11 @@ public partial class MultiplayerSetup : MarginContainer
     [Export] public Button ThreeLetterWordButton;
     [Export] public Button FourLetterWordButton;
     [Export] public Button FiveLetterWordButton;
+    [Export] private StyleBox _idleStyleBox;
+    [Export] private StyleBox _pendingStyleBox;
+    [Export] private StyleBox _placeableStyleBox;
+    [Export] private StyleBox _placedStyleBox;
+    [Export] private StyleBox _pendingFailedStyleBox;
     
     public override void _Ready()
     {
@@ -55,18 +63,11 @@ public partial class MultiplayerSetup : MarginContainer
             GD.Print(name);
         }
     
-        // get out of here with the compiler warnings these will be initialized during the first iteration of creating
-        // the board below.
-        StyleBox idleStyleBox = null!;
-        StyleBox selectedStyleBox = null!;
-        StyleBox placingStyleBox = null!;
-        StyleBox placedStyleBox = null!;
-        StyleBox placingFailedStyleBox = null!;
-        
         var tilePackedScene = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/setup_tile.tscn");
         var height = GetViewportRect().Size.Y;
         var boardSize = Mathf.Min(height * 0.40f, 600); // board is reserved 40% of screen height 
         var tileSize = boardSize / 7f; // 6 tiles but spaces between
+        var styleBoxDict = new Dictionary<string, StyleBox>();
         
         for (var i = 0; i < 6; i++)
         {
@@ -78,13 +79,13 @@ public partial class MultiplayerSetup : MarginContainer
                 tile.CustomMinimumSize = new Vector2(tileSize, tileSize);
                 if (i == 0 && j == 0)
                 {
-                    idleStyleBox = tile.GetThemeStylebox("panel_idle");
-                    selectedStyleBox = tile.GetThemeStylebox("panel_selected");
-                    placingStyleBox = tile.GetThemeStylebox("panel_placing");
-                    placedStyleBox = tile.GetThemeStylebox("panel_placed");
-                    placingFailedStyleBox = tile.GetThemeStylebox("panel_placing_fail");
+                    styleBoxDict.Add("idle", _idleStyleBox);
+                    styleBoxDict.Add("pending", _pendingStyleBox);
+                    styleBoxDict.Add("placeable", _placeableStyleBox);
+                    styleBoxDict.Add("placed", _placedStyleBox);
+                    styleBoxDict.Add("pendingFailed", _pendingFailedStyleBox);
                 }
-                tile.Init(_controller, i,j,tileSize, idleStyleBox,  selectedStyleBox, placingStyleBox, placingFailedStyleBox,placedStyleBox);
+                tile.Init(_controller, i, j, tileSize, styleBoxDict);
                 _controller.Board[i].Add(tile);
             }
         }

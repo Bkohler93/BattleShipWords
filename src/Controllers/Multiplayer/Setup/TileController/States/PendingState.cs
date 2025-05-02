@@ -27,22 +27,28 @@ public class PendingState: ITileState
 
     public override void Enter()
     {
-        GD.Print($"PendingState: hasConflict={_hasConflict} trying to set letter={_letter}");
         if (_hasConflict)
         {
             //TODO display PlacingError stylebox
+            _controller.DisplayStyleBox("pendingFailed");
             if (!_controller.HasLetter())
                 _controller.SetLetter(_letter);
         }
         else
         {
             //TODO display Placed stylebox
+            _controller.DisplayStyleBox("pending");
             _controller.SetLetter(_letter);
         }
     }
 
     public override void Exit()
     {
+    }
+
+    public override void SetPlaceable()
+    {
+        _controller.TransitionTo(new PlaceableState(_controller, _originalState));
     }
 
     public override void Retract()
@@ -63,5 +69,10 @@ public class PendingState: ITileState
         }
         _controller.RemoveLetter();
         _controller.TransitionTo(new IdleState(_controller));    
+    }
+
+    public bool IsOriginallyPlaced()
+    {
+        return _originalState is PlacedState;
     }
 }

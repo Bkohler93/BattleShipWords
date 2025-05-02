@@ -6,13 +6,13 @@ namespace BattleshipWithWords.Services.Scenes;
 public class MainMenuScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private MainMenu _mainMenu;
 
-    public MainMenuScene(SceneManager sceneManager, UIManager uiManager)
+    public MainMenuScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -30,15 +30,15 @@ public class MainMenuScene : IScene
         var mainMenu = ResourceLoader.Load<PackedScene>("res://scenes/menus/main_menu.tscn").Instantiate() as MainMenu;
         mainMenu!.OnSinglePlayerButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new SinglePlayerGameScene(_sceneManager, _uiManager), TransitionDirection.Forward);
+            _sceneManager.TransitionTo(new SinglePlayerGameScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         mainMenu.OnMultiplayerButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _uiManager), TransitionDirection.Forward);
+            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         mainMenu.OnSettingsButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new SettingsScene(_sceneManager, _uiManager), TransitionDirection.Forward);
+            _sceneManager.TransitionTo(new SettingsScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         mainMenu.OnQuitButtonPressed = () =>
         {

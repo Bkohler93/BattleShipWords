@@ -6,13 +6,13 @@ namespace BattleshipWithWords.Services.Scenes;
 public class TutorialScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private Tutorial _tutorial;
 
-    public TutorialScene(SceneManager sceneManager, UIManager uiManager)
+    public TutorialScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager; 
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
     
     public void Exit(Tween tween, TransitionDirection direction)
@@ -29,7 +29,7 @@ public class TutorialScene : IScene
         var tutorial = ResourceLoader.Load<PackedScene>("res://scenes/games/tutorial.tscn").Instantiate() as Tutorial;
         tutorial!.OnFinish = () =>
         {
-            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager), TransitionDirection.Forward);
+            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         return tutorial;
     }

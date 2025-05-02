@@ -9,17 +9,17 @@ namespace BattleshipWithWords.Services;
 public class AppManager
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
 
-    public AppManager(SceneManager sceneManager, UIManager uiManager)
+    public AppManager(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void PlayTutorial()
     {
-        _sceneManager.TransitionTo(new TutorialScene(_sceneManager, _uiManager), TransitionDirection.Forward);
+        _sceneManager.TransitionTo(new TutorialScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
     }
 
     public void Start()
@@ -28,6 +28,6 @@ public class AppManager
         // _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager), TransitionDirection.Forward);
 
         var gameManager = new MultiplayerGameManager(1, 1);
-        _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager, _sceneManager, _uiManager), TransitionDirection.Forward);
+        _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager, _sceneManager, _overlayManager), TransitionDirection.Forward);
     }
 }

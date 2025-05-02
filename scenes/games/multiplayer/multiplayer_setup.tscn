@@ -1,10 +1,38 @@
-[gd_scene load_steps=6 format=3 uid="uid://cxeoo56cntwt0"]
+[gd_scene load_steps=11 format=3 uid="uid://cxeoo56cntwt0"]
 
 [ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_ip0qt"]
 [ext_resource type="Script" uid="uid://cu2ixgbxdujeq" path="res://src/Nodes/Game/multiplayer/MultiplayerSetup.cs" id="1_xi4jw"]
 [ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="3_di8go"]
 [ext_resource type="FontFile" uid="uid://dcxqd8p316xs7" path="res://assets/fonts/Font Awesome 6 Free-Regular-400.otf" id="4_kht3e"]
 [ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="4_y05ku"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebx8l"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kmiug"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_61ecb"]
+bg_color = Color(0.164706, 0.270588, 0.313726, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_51qsn"]
+bg_color = Color(0.164706, 0.270588, 0.313726, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_85h8h"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.2, 0.235294, 1)
 
 [node name="MultiplayerSetup" type="MarginContainer" node_paths=PackedStringArray("_gridContainer", "ConfirmButton", "NextWordsButton", "PreviousWordsButton", "ThreeLetterWordButton", "FourLetterWordButton", "FiveLetterWordButton")]
 anchors_preset = 15
@@ -21,6 +49,11 @@ PreviousWordsButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control2/HB
 ThreeLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/ThreeLetterButton")
 FourLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/FourLetterButton")
 FiveLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/FiveLetterButton")
+_idleStyleBox = SubResource("StyleBoxFlat_ebx8l")
+_pendingStyleBox = SubResource("StyleBoxFlat_kmiug")
+_placeableStyleBox = SubResource("StyleBoxFlat_61ecb")
+_placedStyleBox = SubResource("StyleBoxFlat_51qsn")
+_pendingFailedStyleBox = SubResource("StyleBoxFlat_85h8h")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

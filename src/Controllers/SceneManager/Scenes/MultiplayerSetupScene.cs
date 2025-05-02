@@ -1,5 +1,6 @@
 using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Services.GameManager;
+using BattleshipWithWords.Services.Overlays;
 using Godot;
 using Godot.NativeInterop;
 
@@ -7,14 +8,14 @@ namespace BattleshipWithWords.Services.Scenes;
 
 public class MultiplayerSetupScene : IScene
 {
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private SceneManager _sceneManager;
     private MultiplayerGameManager _gameManager;
     private MultiplayerSetup _node;
 
-    public MultiplayerSetupScene(MultiplayerGameManager gameManager, SceneManager sceneManager, UIManager uiManager)
+    public MultiplayerSetupScene(MultiplayerGameManager gameManager, SceneManager sceneManager, OverlayManager overlayManager)
     {
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
         _sceneManager = sceneManager;
         _gameManager = gameManager;
     }
@@ -27,6 +28,14 @@ public class MultiplayerSetupScene : IScene
     public void Enter(Tween tween, TransitionDirection direction)
     {
         SceneTransitions.MenuEnter(_node, tween, direction);
+        
+        var pauseOverlay = new PauseOverlay();
+        pauseOverlay.SetOnQuit(() =>
+        {
+            _overlayManager.Pop();
+            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
+        });
+        _overlayManager.Push(pauseOverlay);
     }
 
     public Node Create()

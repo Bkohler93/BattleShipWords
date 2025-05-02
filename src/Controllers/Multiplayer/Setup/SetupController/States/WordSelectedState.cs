@@ -25,7 +25,7 @@ class WordSelectedState: SetupState
         {
             if (touch.IsPressed())
             {
-                _controller.TransitionTo(new TileSelectedState(_controller, tile));
+                _controller.TransitionTo(new StartingTileSelectedState(_controller, tile));
             }
         }
     }

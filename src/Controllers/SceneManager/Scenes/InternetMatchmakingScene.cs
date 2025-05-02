@@ -6,12 +6,12 @@ namespace BattleshipWithWords.Services.Scenes;
 public class InternetMatchmakingScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
 
-    public InternetMatchmakingScene(SceneManager sceneManager, UIManager uiManager)
+    public InternetMatchmakingScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -29,7 +29,7 @@ public class InternetMatchmakingScene : IScene
         var matchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/internet_matchmaking.tscn").Instantiate() as InternetMatchmaking;
         matchmaking!.OnCancelButtonPressed = () =>
         {
-            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _uiManager), TransitionDirection.Backward);
+            _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
             
         return matchmaking;

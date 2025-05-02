@@ -6,13 +6,13 @@ namespace BattleshipWithWords.Services.Scenes;
 public class MultiplayerGameScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private Control _multiplayerGame;//TODO CREATE MULTIPLAYER GAME AND SET IT TO THAT
 
-    public MultiplayerGameScene(SceneManager sceneManager, UIManager uiManager)
+    public MultiplayerGameScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween, TransitionDirection direction)

@@ -4,6 +4,7 @@ using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Services.Multiplayer.Setup.TileController;
 using BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
+using Godot.Collections;
 
 // public enum SetupTileStatus
 // {
@@ -42,32 +43,34 @@ public partial class SetupTile : Panel
     public int Col=-1;
     private float _size;
     
-    private StyleBox _idleStyleBox;
-    private StyleBox _selectedStyleBox;
-    private StyleBox _placingStyleBox;
-    private StyleBox _placingFailedStyleBox;
-    private StyleBox _placedStyleBox;
+    // private StyleBox _idleStyleBox;
+    // private StyleBox _selectedStyleBox;
+    // private StyleBox _placingStyleBox;
+    // private StyleBox _placingFailedStyleBox;
+    // private StyleBox _placedStyleBox;
+    private Dictionary<string, StyleBox> _styleBoxDict;
 
-    public void Init(SetupController controller, int row, int col, float size, StyleBox idleStyleBox, StyleBox selectedStyleBox, StyleBox placingStyleBox, StyleBox placingFailedStyleBox, StyleBox placedStyleBox)
+    public void Init(SetupController controller, int row, int col, float size, Dictionary<string,StyleBox> styleBoxDict)
     {
         _controller = new TileController(this);
         _setupController = controller; 
         Row = row;
         Col = col;
         _size = size;
+        _styleBoxDict = styleBoxDict;
         // _placementThreshold = new Vector2(_size / 2, _size / 2);
-        _idleStyleBox = idleStyleBox;
-        _selectedStyleBox = selectedStyleBox;
-        _placingStyleBox = placingStyleBox;
-        _placedStyleBox = placedStyleBox;
-        _placingFailedStyleBox = placingFailedStyleBox;
+        // _idleStyleBox = idleStyleBox;
+        // _selectedStyleBox = selectedStyleBox;
+        // _placingStyleBox = placingStyleBox;
+        // _placedStyleBox = placedStyleBox;
+        // _placingFailedStyleBox = placingFailedStyleBox;
         _controller.TransitionTo(new IdleState(_controller));
     }
 
-    public void Select(bool hasConflict)
-    {
-        _controller.HandleSelect(hasConflict);
-    }
+    // public void Select(bool hasConflict)
+    // {
+    //     _controller.HandleSelect(hasConflict);
+    // }
 
     public void Release()
     {
@@ -194,7 +197,7 @@ public partial class SetupTile : Panel
 
     public bool IsPlaced()
     {
-        return _controller.CurrentState is PlacedState;
+        return _controller.CurrentState is PlacedState || (_controller.CurrentState is PendingState state && state.IsOriginallyPlaced());
     }
 
     public bool HasLetter(string letter)
@@ -225,6 +228,26 @@ public partial class SetupTile : Panel
     public bool IsSelected()
     {
         return _controller.CurrentState is SelectedState;
+    }
+
+    public void SetPlaceable()
+    {
+        _controller.HandleSetPlaceable();
+        // _controller.TransitionTo(new PlaceableState(_controller));
+    }
+
+    public void SetPlaced()
+    {
+        _controller.TransitionTo(new PlacedState(_controller));
+    }
+
+    public void ChangeToStyleBox(string name)
+    {
+        if (!_styleBoxDict.ContainsKey(name))
+            throw new Exception($"no stylebox exists with name {name}");
+        var styleBox = _styleBoxDict[name];
+        
+        AddThemeStyleboxOverride("panel", styleBox);
     }
 }
 

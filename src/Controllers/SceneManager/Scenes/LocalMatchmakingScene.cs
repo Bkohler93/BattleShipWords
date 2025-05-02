@@ -8,13 +8,13 @@ namespace BattleshipWithWords.Services.Scenes;
 public class LocalMatchmakingScene : IScene
 {
     private SceneManager _sceneManager;
-    private UIManager _uiManager;
+    private OverlayManager _overlayManager;
     private LocalMatchmaking _node;
 
-    public LocalMatchmakingScene(SceneManager sceneManager, UIManager uiManager)
+    public LocalMatchmakingScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
-        _uiManager = uiManager;
+        _overlayManager = overlayManager;
     }
 
     public void Exit(Tween tween,  TransitionDirection direction)
@@ -32,12 +32,12 @@ public class LocalMatchmakingScene : IScene
         var localMatchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/local_matchmaking.tscn").Instantiate() as LocalMatchmaking;
         localMatchmaking.BackToMainMenu = () =>
         {
-            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _uiManager), TransitionDirection.Backward);
+            _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
         localMatchmaking.StartGame = (peerId, id) =>
         {
             var gameManager = new MultiplayerGameManager(peerId, id);
-            _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _uiManager), TransitionDirection.Forward);
+            _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         _node = localMatchmaking;
         return localMatchmaking;

@@ -15,7 +15,7 @@ public partial class AppRoot : Control
         
         var sceneRoot = GetNode("SceneRoot");
         var uiRoot = GetNode("UIRoot");
-        _appManager = new AppManager(new SceneManager(sceneRoot), new UIManager(uiRoot));
+        _appManager = new AppManager(new SceneManager(sceneRoot), new OverlayManager(uiRoot));
         
         if (ShouldShowTutorial())
             _appManager.PlayTutorial();
