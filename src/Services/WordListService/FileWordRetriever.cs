@@ -4,12 +4,13 @@ using Godot;
 
 namespace BattleshipWithWords.Services.WordList;
 
-public class FileWordListService
+public class FileWordRetrieverService
 {
     private string _basePath;
     private Random _random; 
+    private Dictionary<int, List<string>> _words = new();
     
-    public FileWordListService(string basePath)
+    public FileWordRetrieverService(string basePath)
     {
         _basePath = basePath; 
         _random = new Random();

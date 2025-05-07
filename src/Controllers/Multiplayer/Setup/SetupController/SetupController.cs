@@ -1,35 +1,39 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using BattleshipWithWords.Controllers.Multiplayer.Setup.States;
+using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Services.WordList;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
-public class SetupController
+public class MultiplayerSetupController
 {
+    public MultiplayerGameManager GameManager;
     public SetupState CurrentState;
     public readonly MultiplayerSetup SetupNode;
-    private readonly FileWordListService _wordListService = new("res://data/wordlists");
+    private readonly FileWordRetriever _wordRetriever = new("res://data/wordlists", ["threeletters.txt", "fourletters.txt", "fiveletters.txt"]);
     
     public readonly List<List<SetupTile>> Board = [];
 
-    public readonly List<List<string>> Words = [new(), new(), new()];
-    public int WordSelectionIndex = 0; // used to access correct words from Words using Left/Right controls on MultiplayerSetupNode.
+    public readonly List<List<string>> WordOptions = [new(), new(), new()];
+    public int WordsSelectionIndex = 0; // used to access correct words from Words using Left/Right controls on MultiplayerSetupNode.
+    public List<List<(int row, int col)>> BoardSelection = [[], [], []];
+    public List<string> SelectedWords;
     
-    public readonly Random R = new();
     public string SelectedWord;
     public bool IsThreeLetterWordPlaced;
     public bool IsFourLetterWordPlaced;
     public bool IsFiveLetterWordPlaced;
-
-    public SetupController(MultiplayerSetup setupNode)
+    
+    public MultiplayerSetupController(MultiplayerSetup setupNode, MultiplayerGameManager gameManager)
     {
+        GameManager = gameManager;
         SetupNode = setupNode;
-        Words[0] = _wordListService.GetWords("threeletters.txt", 3);
-        Words[1] = _wordListService.GetWords("fourletters.txt", 4);
-        Words[2] = _wordListService.GetWords("fiveletters.txt", 5);
+        WordOptions[0] = _wordRetriever.GetWords(3, 3);
+        WordOptions[1] = _wordRetriever.GetWords(4, 3);
+        WordOptions[2] = _wordRetriever.GetWords(5, 3);
+        SelectedWords = [WordOptions[0][0], WordOptions[1][0], WordOptions[2][0]];
     }
     
     public void TransitionTo(SetupState newState)
@@ -88,10 +92,18 @@ public class SetupController
     
     private bool _canPlaceDown(int col, int startingRow)
     {
+        GD.Print($"SetupController:: _canPlaceDown({col}, {startingRow})");
         var invalidOffsets = new HashSet<int>();
         for (var i = 0; i < SelectedWord.Length; i++)
         {
             var tile = Board[startingRow+i][col];
+            
+            //check if at edge of board and not at last letter of word
+            if (startingRow + i == 5 && i != SelectedWord.Length - 1)
+            {  
+                invalidOffsets.Add(i);
+                break;
+            }
             
             //check if current tile is already placed and NOT the same letter
             if (tile.IsPlaced())
@@ -102,12 +114,7 @@ public class SetupController
                 continue;
             }
             
-            //check if at edge of board and not at last letter of word
-            if (startingRow + i == 5 && i != SelectedWord.Length - 1)
-            {  
-                invalidOffsets.Add(i);
-                break;
-            }
+            
             
             //check if first letter has any conflicting tiles above it
             if (i == 0 && startingRow != 0)
@@ -200,6 +207,13 @@ public class SetupController
         {
             var tile = Board[row][startingCol+i];
             
+            //check if at edge of board and not at last letter of word
+            if (startingCol + i == 5 && i != SelectedWord.Length - 1)
+            {  
+                invalidOffsets.Add(i);
+                break;
+            }
+            
             if (tile.IsPlaced())
             {
                 if (tile.HasLetter(SelectedWord[i].ToString()))
@@ -208,12 +222,7 @@ public class SetupController
                 continue;
             }
             
-            //check if at edge of board and not at last letter of word
-            if (startingCol + i == 5 && i != SelectedWord.Length - 1)
-            {  
-                invalidOffsets.Add(i);
-                break;
-            }
+            
             
             //check if first letter has any conflicting tiles to the left 
             if (i == 0 && startingCol != 0)
@@ -378,6 +387,7 @@ public class SetupController
             {
                 if (startingCol + i > 5) break;
                 var tile = Board[startingRow][startingCol+i];
+                BoardSelection[SelectedWord.Length == 3 ? 0 : SelectedWord.Length == 4 ? 1 : 2].Add((startingRow, startingCol+i));
                 tile.SetPlaced();
             }
         }
@@ -387,6 +397,7 @@ public class SetupController
             {
                 if (startingRow + i > 5) break;
                 var tile = Board[startingRow+i][startingCol];
+                BoardSelection[SelectedWord.Length == 3 ? 0 : SelectedWord.Length == 4 ? 1 : 2].Add((startingRow+i, startingCol));
                 tile.SetPlaced();
             }
         }
@@ -444,13 +455,14 @@ public class SetupController
         _resetBoard(); 
         TransitionTo(new InitialState(this));
         
-        WordSelectionIndex++;
+        WordsSelectionIndex++;
         
-        SetupNode.ThreeLetterWordButton.Text = Words[0][WordSelectionIndex];
-        SetupNode.FourLetterWordButton.Text = Words[1][WordSelectionIndex];
-        SetupNode.FiveLetterWordButton.Text = Words[2][WordSelectionIndex];
+        SetupNode.ThreeLetterWordButton.Text = WordOptions[0][WordsSelectionIndex];
+        SetupNode.FourLetterWordButton.Text = WordOptions[1][WordsSelectionIndex];
+        SetupNode.FiveLetterWordButton.Text = WordOptions[2][WordsSelectionIndex];
+        SelectedWords = [WordOptions[0][WordsSelectionIndex], WordOptions[1][WordsSelectionIndex], WordOptions[2][WordsSelectionIndex]];
         
-        if (WordSelectionIndex == 2)
+        if (WordsSelectionIndex == 2)
             SetupNode.NextWordsButton.Disabled = true;
     }
 
@@ -503,13 +515,14 @@ public class SetupController
         _resetBoard(); 
         TransitionTo(new InitialState(this));
         
-        WordSelectionIndex--;
+        WordsSelectionIndex--;
         
-        SetupNode.ThreeLetterWordButton.Text = Words[0][WordSelectionIndex];
-        SetupNode.FourLetterWordButton.Text = Words[1][WordSelectionIndex];
-        SetupNode.FiveLetterWordButton.Text = Words[2][WordSelectionIndex];
+        SetupNode.ThreeLetterWordButton.Text = WordOptions[0][WordsSelectionIndex];
+        SetupNode.FourLetterWordButton.Text = WordOptions[1][WordsSelectionIndex];
+        SetupNode.FiveLetterWordButton.Text = WordOptions[2][WordsSelectionIndex];
+        SelectedWords = [WordOptions[0][WordsSelectionIndex], WordOptions[1][WordsSelectionIndex], WordOptions[2][WordsSelectionIndex]];
         
-        if (WordSelectionIndex == 0)
+        if (WordsSelectionIndex == 0)
             SetupNode.PreviousWordsButton.Disabled = true;
     }
 
@@ -523,6 +536,10 @@ public class SetupController
                 tile.Reset();
             }
         }
+
+        BoardSelection[0].Clear();
+        BoardSelection[1].Clear();
+        BoardSelection[2].Clear();
     }
     
     private void _resetButtons()
@@ -539,6 +556,21 @@ public class SetupController
     public bool AllWordsPlaced()
     {
         return IsThreeLetterWordPlaced && IsFourLetterWordPlaced && IsFiveLetterWordPlaced; 
+    }
+
+    public void AutoSetup()
+    {
+        SelectedWords = [];
+        for (var i = 0; i < 3; i++)
+        {
+            var word = WordOptions[i][WordsSelectionIndex];
+            for (var j = 0; j < word.Length; j++)
+            {
+                BoardSelection[i].Add((i*2,j));
+            }
+            SelectedWords.Add(word);
+        }
+        SetupNode.SetupCompleteCallback.Invoke(SelectedWords, BoardSelection);
     }
 }
 

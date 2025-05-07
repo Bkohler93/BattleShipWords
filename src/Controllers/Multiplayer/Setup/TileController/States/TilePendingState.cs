@@ -1,6 +1,6 @@
 using Godot;
 
-namespace BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 public class PendingState: ITileState
 {

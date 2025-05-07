@@ -1,4 +1,4 @@
-namespace BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
+namespace BattleshipWithWords.Services.Multiplayer.Setup;
 
 public class PlaceableState : ITileState
 {
