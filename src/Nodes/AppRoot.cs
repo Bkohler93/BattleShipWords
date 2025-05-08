@@ -1,7 +1,6 @@
 using Godot;
-using System;
 using BattleshipWithWords;
-using BattleshipWithWords.Services;
+using BattleshipWithWords.Controllers;
 
 public partial class AppRoot : Control
 {
@@ -15,7 +14,11 @@ public partial class AppRoot : Control
         
         var sceneRoot = GetNode("SceneRoot");
         var uiRoot = GetNode("UIRoot");
-        _appManager = new AppManager(new SceneManager(sceneRoot), new OverlayManager(uiRoot));
+        var sceneManager = new SceneManager(sceneRoot);
+        var overlayManager = new OverlayManager(uiRoot);
+        sceneManager.SetOverlayManager(overlayManager);
+        overlayManager.SetSceneManager(sceneManager);
+        _appManager = new AppManager(sceneManager, overlayManager);
         
         if (ShouldShowTutorial())
             _appManager.PlayTutorial();

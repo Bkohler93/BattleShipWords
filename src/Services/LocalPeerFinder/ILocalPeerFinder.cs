@@ -1,3 +1,5 @@
+using BattleshipWithWords.Nodes.Menus;
+
 namespace BattleshipWithWords.Services;
 
 public interface ILocalPeerFinder
@@ -6,6 +8,14 @@ public interface ILocalPeerFinder
     int StartService();
     void StopService();
     void StartListening();
-    void ConnectSignals(LocalMatchmaking matchmaking);
+    void ConnectSignals(ILocalPeerFinderConnector connector);
     void Cleanup();
+}
+
+public interface ILocalPeerFinderConnector
+{
+    public void OnRegisteredService();
+    public void OnRegisterServiceFailed();
+    public void OnUnregisteredService();
+    public void OnServiceFound(string ip, int port);
 }

@@ -4,24 +4,7 @@
 [ext_resource type="Script" uid="uid://cs68yse7g4501" path="res://src/Nodes/Overlays/PauseMenu.cs" id="1_o3j3x"]
 [ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="2_bpbql"]
 [ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="3_o3j3x"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o3j3x"]
-bg_color = Color(1, 1, 1, 0.368627)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-expand_margin_left = 72.0
-expand_margin_top = 36.0
-expand_margin_right = 72.0
-expand_margin_bottom = 36.0
-shadow_color = Color(0, 0, 0, 0.34902)
-shadow_size = 2
-shadow_offset = Vector2(6, 6)
+[ext_resource type="StyleBox" uid="uid://br3x1whpudve8" path="res://themes/overlay_menu.tres" id="5_pslgv"]
 
 [node name="Pause" type="CanvasLayer" node_paths=PackedStringArray("_pauseButton", "_continueButton", "_quitButton", "_pausePanel")]
 script = ExtResource("1_o3j3x")
@@ -74,7 +57,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_o3j3x")
+theme_override_styles/panel = ExtResource("5_pslgv")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Control2/PausePanel"]
 layout_mode = 2

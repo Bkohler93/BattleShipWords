@@ -1,22 +1,22 @@
 using System;
 using Godot;
 
-namespace BattleshipWithWords.Services.Overlays;
+namespace BattleshipWithWords.Controllers;
 
 public class PauseOverlay : IOverlay
 {
    private PauseMenu _pauseMenu;
-   private Action _onQuit;
+   public Action ExitButtonPressed;
+   public Action ContinueButtonPressed;
+   public Action PauseButtonPressed;
+   
    public PauseOverlay()
    {
       _pauseMenu =
          ResourceLoader.Load<PackedScene>("res://scenes/overlays/pause_overlay.tscn").Instantiate() as PauseMenu;
-   }
-
-   public void SetOnQuit(Action onQuit)
-   {
-      _onQuit = onQuit;
-      _pauseMenu.OnQuitButtonPressed = _onQuit;
+      _pauseMenu.OnQuitButtonPressedEventHandler += () => ExitButtonPressed?.Invoke();
+      _pauseMenu.OnContinueButtonPressedEventHandler += () => ContinueButtonPressed?.Invoke();
+      _pauseMenu.OnPauseButtonPressedEventHandler += () => PauseButtonPressed?.Invoke();
    }
 
    public CanvasLayer GetNode()

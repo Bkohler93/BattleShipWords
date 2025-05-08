@@ -22,6 +22,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.137255, 0.231373, 0.27451, 1)
+color = Color(0.164706, 0.270588, 0.313726, 1)
 
 [node name="UIRoot" type="CanvasLayer" parent="."]

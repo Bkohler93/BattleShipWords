@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 
-namespace BattleshipWithWords.Controllers.Multiplayer.Setup.States;
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 public class StartingTileSelectedState: SetupState
 {

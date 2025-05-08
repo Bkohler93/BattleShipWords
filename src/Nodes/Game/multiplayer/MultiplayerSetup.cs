@@ -1,14 +1,15 @@
 using System;
-using System.Reflection;
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Controllers.Multiplayer.Setup;
-using BattleshipWithWords.Controllers.Multiplayer.Setup.States;
+using BattleshipWithWords.Networkutils;
 using Godot;
-using Godot.Collections;
 
 public partial class MultiplayerSetup : MarginContainer
 {
-    [Export]
-    private GridContainer _gridContainer;
+    private float _separationGap = 40f/6f; 
+    
+    [Export] private GridContainer _gridContainer;
 
     private SetupController _controller;
     
@@ -24,9 +25,10 @@ public partial class MultiplayerSetup : MarginContainer
     [Export] private StyleBox _placedStyleBox;
     [Export] private StyleBox _pendingFailedStyleBox;
     
+    public Action<List<string>,List<List<(int row, int col)>>> SetupCompleteCallback;
+    
     public override void _Ready()
     {
-        _controller = new SetupController(this);
         _initializeBoard();
         _initializeUI();
 
@@ -37,7 +39,16 @@ public partial class MultiplayerSetup : MarginContainer
         FourLetterWordButton.Pressed += () => _controller.HandleWordSelectionButton(WordSelectionButtonId.Four);
         FiveLetterWordButton.Pressed += () => _controller.HandleWordSelectionButton(WordSelectionButtonId.Five);
         _controller.TransitionTo(new InitialState(_controller));
+        // _controller.AutoSetup();
+        if (PlatformUtils.GetPlatform() == Platform.Other)
+            _controller.AutoSetup();
     }
+
+
+    public void Init(MultiplayerGameManager gameManager)
+    {
+        _controller = new SetupController(this, gameManager);
+    } 
 
     private void _initializeUI()
     {
@@ -46,10 +57,9 @@ public partial class MultiplayerSetup : MarginContainer
         PreviousWordsButton.Text = "\uf104";
         PreviousWordsButton.Disabled = true;
         ConfirmButton.SetDisabled(true);
-        GD.Print("made it here"); 
-        ThreeLetterWordButton.Text = _controller.Words[0][_controller.WordSelectionIndex];
-        FourLetterWordButton.Text = _controller.Words[1][_controller.WordSelectionIndex];
-        FiveLetterWordButton.Text = _controller.Words[2][_controller.WordSelectionIndex];
+        ThreeLetterWordButton.Text = _controller.WordOptions[0][_controller.WordsSelectionIndex];
+        FourLetterWordButton.Text = _controller.WordOptions[1][_controller.WordsSelectionIndex];
+        FiveLetterWordButton.Text = _controller.WordOptions[2][_controller.WordsSelectionIndex];
     }
 
     private void _onConfirmButtonPressed()
@@ -64,19 +74,16 @@ public partial class MultiplayerSetup : MarginContainer
         }
     
         var tilePackedScene = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/setup_tile.tscn");
-        var height = GetViewportRect().Size.Y;
-        var boardSize = Mathf.Min(height * 0.40f, 600); // board is reserved 40% of screen height 
-        var tileSize = boardSize / 7f; // 6 tiles but spaces between
-        var styleBoxDict = new Dictionary<string, StyleBox>();
+        var contentScreenHeight = GetViewportRect().Size.Y - (48 + 34);
+        var boardSize = Mathf.Min(contentScreenHeight * 0.40f, 600); // board is reserved 40% of screen height 
+        var tileSize = boardSize / 6f - _separationGap; 
+        var styleBoxDict = new Godot.Collections.Dictionary<string, StyleBox>();
         
         for (var i = 0; i < 6; i++)
         {
             _controller.Board.Add([]);
             for (var j = 0; j < 6; j++)
             {
-                var tile = tilePackedScene.Instantiate() as SetupTile;
-                _gridContainer.AddChild(tile);
-                tile.CustomMinimumSize = new Vector2(tileSize, tileSize);
                 if (i == 0 && j == 0)
                 {
                     styleBoxDict.Add("idle", _idleStyleBox);
@@ -85,9 +92,14 @@ public partial class MultiplayerSetup : MarginContainer
                     styleBoxDict.Add("placed", _placedStyleBox);
                     styleBoxDict.Add("pendingFailed", _pendingFailedStyleBox);
                 }
+                var tile = tilePackedScene.Instantiate() as SetupTile;
+                tile.CustomMinimumSize = new Vector2(tileSize, tileSize);
                 tile.Init(_controller, i, j, tileSize, styleBoxDict);
+                _gridContainer.AddChild(tile);
+                
                 _controller.Board[i].Add(tile);
             }
         }
     }
+
 }

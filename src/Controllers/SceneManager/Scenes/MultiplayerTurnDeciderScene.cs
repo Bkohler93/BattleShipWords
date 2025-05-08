@@ -1,8 +1,8 @@
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
-using BattleshipWithWords.Services.GameManager;
 using Godot;
 
-namespace BattleshipWithWords.Services.Scenes;
+namespace BattleshipWithWords.Controllers;
 
 public class MultiplayerTurnDeciderScene : IScene
 {

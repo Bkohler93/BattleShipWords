@@ -1,7 +1,36 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://g4rfga2jglnb"]
+[gd_resource type="Theme" load_steps=14 format=3 uid="uid://g4rfga2jglnb"]
+
+[ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="1_ebx8l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pja1h"]
+bg_color = Color(0.0784314, 0.141176, 0.168627, 0.537255)
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hcr70"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+corner_detail = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_be4qw"]
-bg_color = Color(0.0784314, 0.8, 0.368627, 1)
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7bp1g"]
+bg_color = Color(0.576471, 0.658824, 0.67451, 1)
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q5f5j"]
+bg_color = Color(0.0784314, 0.141176, 0.168627, 0.494118)
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_luxw2"]
+bg_color = Color(0.0784314, 0.141176, 0.168627, 0)
+border_width_left = 14
+border_width_top = 14
+border_width_right = 14
+border_width_bottom = 14
+border_color = Color(0.0784314, 0.8, 0.368627, 1)
+border_blend = true
+corner_detail = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ff8gu"]
 bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
@@ -35,7 +64,15 @@ border_width_right = 2
 border_width_bottom = 2
 
 [resource]
+Button/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+Button/font_sizes/font_size = 32
+Button/fonts/font = ExtResource("1_ebx8l")
+Button/styles/disabled = SubResource("StyleBoxFlat_pja1h")
+Button/styles/hover = SubResource("StyleBoxFlat_hcr70")
 Button/styles/normal = SubResource("StyleBoxFlat_be4qw")
+Button/styles/pressed = SubResource("StyleBoxFlat_7bp1g")
+Button/styles/uncovered = SubResource("StyleBoxFlat_q5f5j")
+Button/styles/word_found = SubResource("StyleBoxFlat_luxw2")
 Panel/styles/panel = SubResource("StyleBoxFlat_ff8gu")
 Panel/styles/panel_idle = SubResource("StyleBoxFlat_ebx8l")
 Panel/styles/panel_placed = SubResource("StyleBoxFlat_51qsn")

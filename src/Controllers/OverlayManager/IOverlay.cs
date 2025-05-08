@@ -1,6 +1,6 @@
 using Godot;
 
-namespace BattleshipWithWords.Services;
+namespace BattleshipWithWords.Controllers;
 
 public interface IOverlay
 {

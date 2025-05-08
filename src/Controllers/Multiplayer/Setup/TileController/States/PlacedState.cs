@@ -1,4 +1,6 @@
-namespace BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
+using BattleshipWithWords.Services.Multiplayer.Setup;
+
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 public class PlacedState: ITileState
 {
@@ -21,11 +23,11 @@ public class PlacedState: ITileState
 
     public override void SetPlaceable()
     {
-        _controller.TransitionTo(new PlaceableState(_controller, this));
+        _controller.TransitionTo(new TilePlaceableState(_controller, this));
     }
 
     public override void Predict(bool hasConflict, bool isValid, string letter)
     {
-        _controller.TransitionTo(new PendingState(_controller, hasConflict, isValid,letter, this));
+        _controller.TransitionTo(new TilePendingState(_controller, hasConflict, isValid,letter, this));
     }
 }

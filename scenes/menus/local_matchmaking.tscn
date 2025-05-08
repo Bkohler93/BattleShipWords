@@ -45,7 +45,7 @@ Button/styles/hover = SubResource("StyleBoxFlat_etamx")
 Button/styles/normal = SubResource("StyleBoxFlat_uo45u")
 Button/styles/pressed = SubResource("StyleBoxFlat_d2otk")
 
-[node name="LocalMatchmaking" type="MarginContainer" node_paths=PackedStringArray("_backButton", "_playButton", "_statusLabel", "_updateLabel")]
+[node name="LocalMatchmaking" type="MarginContainer" node_paths=PackedStringArray("BackButton", "PlayButton", "StatusLabel", "UpdateLabel")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -53,10 +53,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_43emd")
 script = ExtResource("2_a1au5")
-_backButton = NodePath("VBoxContainer/Control3/BackButton")
-_playButton = NodePath("VBoxContainer/Control2/VBoxContainer/PlayButton")
-_statusLabel = NodePath("VBoxContainer/Control/VBoxContainer/StatusLabel")
-_updateLabel = NodePath("VBoxContainer/Control/VBoxContainer/UpdateLabel")
+BackButton = NodePath("VBoxContainer/Control3/BackButton")
+PlayButton = NodePath("VBoxContainer/Control2/VBoxContainer/PlayButton")
+StatusLabel = NodePath("VBoxContainer/Control/VBoxContainer/StatusLabel")
+UpdateLabel = NodePath("VBoxContainer/Control/VBoxContainer/UpdateLabel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

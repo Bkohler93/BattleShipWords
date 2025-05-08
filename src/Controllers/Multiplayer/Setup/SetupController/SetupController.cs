@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using BattleshipWithWords.Services.GameManager;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Services.WordList;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
-public class MultiplayerSetupController
+public class SetupController
 {
     public MultiplayerGameManager GameManager;
     public SetupState CurrentState;
@@ -26,7 +26,7 @@ public class MultiplayerSetupController
     public bool IsFourLetterWordPlaced;
     public bool IsFiveLetterWordPlaced;
     
-    public MultiplayerSetupController(MultiplayerSetup setupNode, MultiplayerGameManager gameManager)
+    public SetupController(MultiplayerSetup setupNode, MultiplayerGameManager gameManager)
     {
         GameManager = gameManager;
         SetupNode = setupNode;

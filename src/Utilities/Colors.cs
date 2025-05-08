@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-namespace BattleshipWithWords.Networkutils;
+namespace BattleshipWithWords.Utilities;
 
 public enum ColorName
 {

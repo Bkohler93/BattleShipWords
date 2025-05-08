@@ -1,9 +1,10 @@
+using System.Runtime.InteropServices;
 using System.Threading;
 using Godot;
 
 namespace BattleshipWithWords.Services;
 
-public partial class AndroidLocalPeerFinder : Node,
+public class AndroidLocalPeerFinder :
     ILocalPeerFinder
 {
     private string _serviceType;
@@ -22,13 +23,10 @@ public partial class AndroidLocalPeerFinder : Node,
         _serviceName = serviceName;
         _servicePort = servicePort;
         _androidPlugin = Engine.GetSingleton("GodotAndroidPeerFinder");
-        if (OS.RequestPermissions())
-        {
-            GD.Print("Permissions already granted");
-        } else
+        if (!OS.RequestPermissions())
         {
             GD.Print("Permissions granted");
-        }
+        } 
     }
 
     public int StartService()
@@ -49,23 +47,23 @@ public partial class AndroidLocalPeerFinder : Node,
     public void StartListening()
     {
         _androidPlugin.Call("listen", _serviceType, _serviceName);
-        GD.Print("Listening");
     }
 
-    public void ConnectSignals(LocalMatchmaking matchmaking)
+    public void ConnectSignals(ILocalPeerFinderConnector connector)
     {
-        _registeredServiceCallable = Callable.From(matchmaking.OnRegisteredService);
+        _registeredServiceCallable = Callable.From(connector.OnRegisteredService);
         _androidPlugin.Connect("RegisteredService", _registeredServiceCallable);
 
-        _registerServiceFailedCallable = Callable.From(matchmaking.OnRegisterServiceFailed);
+        _registerServiceFailedCallable = Callable.From(connector.OnRegisterServiceFailed);
         _androidPlugin.Connect("RegisterServiceFailed", _registerServiceFailedCallable);
         
-        _unregisteredServiceCallable = Callable.From(matchmaking.OnUnregisteredService); 
+        _unregisteredServiceCallable = Callable.From(connector.OnUnregisteredService); 
         _androidPlugin.Connect("UnregisteredService", _unregisteredServiceCallable);
 
         _foundServiceCallable = Callable.From((string ip, string portStr) =>
-            matchmaking.OnServerFound(ip, int.Parse(portStr))
-        );
+        {
+            connector.OnServiceFound(ip, int.Parse(portStr));
+        });
         _androidPlugin.Connect("FoundService", _foundServiceCallable);
     }
 

@@ -1,8 +1,9 @@
+using BattleshipWithWords.Services.Multiplayer.Setup;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
-public class PendingState: ITileState
+public class TilePendingState: ITileState
 {
     private TileController _controller;
     private bool _hasConflict;
@@ -11,7 +12,7 @@ public class PendingState: ITileState
     private string _letter;
     private bool _didChangeLetter;
 
-    public PendingState(TileController controller, bool hasConflict, bool isValid, string letter, ITileState originalState)
+    public TilePendingState(TileController controller, bool hasConflict, bool isValid, string letter, ITileState originalState)
     {
         _controller = controller;
         _hasConflict = hasConflict;
@@ -48,7 +49,7 @@ public class PendingState: ITileState
 
     public override void SetPlaceable()
     {
-        _controller.TransitionTo(new PlaceableState(_controller, _originalState));
+        _controller.TransitionTo(new TilePlaceableState(_controller, _originalState));
     }
 
     public override void Retract()
@@ -68,7 +69,7 @@ public class PendingState: ITileState
             return;
         }
         _controller.RemoveLetter();
-        _controller.TransitionTo(new IdleState(_controller));    
+        _controller.TransitionTo(new TileIdleState(_controller));    
     }
 
     public bool IsOriginallyPlaced()

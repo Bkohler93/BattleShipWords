@@ -1,7 +1,6 @@
-using System.Runtime.InteropServices;
 using Godot;
 
-namespace BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 public class SelectedState : ITileState
 {
@@ -38,14 +37,14 @@ public class SelectedState : ITileState
 
     public override void Release()
     {
-        _controller.TransitionTo(new IdleState(_controller));
+        _controller.TransitionTo(new TileIdleState(_controller));
     }
 
     public override void Predict(bool hasConflict, bool isValid, string letter)
     {
        GD.Print($"SelectedState: new hasConflict={hasConflict}, original _hasConflict={_hasConflict}, letter={letter}"); 
         if (_hasConflict) return; 
-        _controller.TransitionTo(new PendingState(_controller, false, isValid, letter, this));
+        _controller.TransitionTo(new TilePendingState(_controller, false, isValid, letter, this));
     }
 
     // public override void Revert()

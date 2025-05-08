@@ -3,20 +3,20 @@ using Godot;
 
 namespace BattleshipWithWords.Controllers;
 
-public class LoseOverlay : IOverlay
+public class WinOverlay : IOverlay
 {
    public Action QuitButtonPressed;
-   private Lose _loseNode;
+   private Win _winNode;
    
-   public LoseOverlay()
+   public WinOverlay()
    {
-      _loseNode =
-         ResourceLoader.Load<PackedScene>("res://scenes/overlays/lose_overlay.tscn").Instantiate() as Lose;
-      _loseNode.OnQuitPressed += () => QuitButtonPressed?.Invoke();
+      _winNode =
+         ResourceLoader.Load<PackedScene>("res://scenes/overlays/win_overlay.tscn").Instantiate() as Win;
+      _winNode.OnQuitPressed += () => QuitButtonPressed?.Invoke();
    }
 
    public CanvasLayer GetNode()
    {
-      return _loseNode;
+      return _winNode;
    }
 }

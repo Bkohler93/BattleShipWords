@@ -1,6 +1,6 @@
 using Godot;
 
-namespace BattleshipWithWords.Controllers.Multiplayer.Setup.States;
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 class WordSelectedState: SetupState
 {

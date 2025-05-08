@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cg23djltseu4b" path="res://src/Nodes/Game/multiplayer/SetupTile.cs" id="2_xbv1e"]
 
 [node name="SetupTile" type="Panel" node_paths=PackedStringArray("LetterLabel")]
-custom_minimum_size = Vector2(60, 60)
+custom_minimum_size = Vector2(50, 50)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

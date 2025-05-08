@@ -2,11 +2,11 @@ using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
-public class IdleState : ITileState
+public class TileIdleState : ITileState
 {
     private TileController _controller;
 
-    public IdleState(TileController controller)
+    public TileIdleState(TileController controller)
     {
         _controller = controller;
     }
@@ -27,6 +27,6 @@ public class IdleState : ITileState
 
     public override void Predict(bool hasConflict, bool isValid, string letter)
     {
-        _controller.TransitionTo(new PendingState(_controller, hasConflict, isValid, letter, this));
+        _controller.TransitionTo(new TilePendingState(_controller, hasConflict, isValid, letter, this));
     }
 }

@@ -3,24 +3,20 @@ using Godot;
 
 namespace BattleshipWithWords.Controllers;
 
-public class PauseOverlay : IOverlay
+public class LoseOverlay : IOverlay
 {
-   private PauseMenu _pauseMenu;
-   public Action ExitButtonPressed;
-   public Action ContinueButtonPressed;
-   public Action PauseButtonPressed;
+   public Action QuitButtonPressed;
+   private Lose _loseNode;
    
-   public PauseOverlay()
+   public LoseOverlay()
    {
-      _pauseMenu =
-         ResourceLoader.Load<PackedScene>("res://scenes/overlays/pause_overlay.tscn").Instantiate() as PauseMenu;
-      _pauseMenu.OnQuitButtonPressedEventHandler += () => ExitButtonPressed?.Invoke();
-      _pauseMenu.OnContinueButtonPressedEventHandler += () => ContinueButtonPressed?.Invoke();
-      _pauseMenu.OnPauseButtonPressedEventHandler += () => PauseButtonPressed?.Invoke();
+      _loseNode =
+         ResourceLoader.Load<PackedScene>("res://scenes/overlays/lose_overlay.tscn").Instantiate() as Lose;
+      _loseNode.OnQuitPressed += () => QuitButtonPressed?.Invoke();
    }
 
    public CanvasLayer GetNode()
    {
-      return _pauseMenu;
+      return _loseNode;
    }
 }

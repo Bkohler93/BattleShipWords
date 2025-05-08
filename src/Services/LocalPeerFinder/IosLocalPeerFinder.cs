@@ -1,5 +1,7 @@
 using Godot;
 
+using BattleshipWithWords.Nodes.Menus;
+
 namespace BattleshipWithWords.Services;
 
 public partial class IosLocalPeerFinder: Node, ILocalPeerFinder
@@ -30,7 +32,7 @@ public partial class IosLocalPeerFinder: Node, ILocalPeerFinder
         throw new System.NotImplementedException();
     }
 
-    public void ConnectSignals(LocalMatchmaking matchmaking)
+    public void ConnectSignals(ILocalPeerFinderConnector connector)
     {
         throw new System.NotImplementedException();
     }

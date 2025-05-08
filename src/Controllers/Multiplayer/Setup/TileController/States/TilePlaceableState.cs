@@ -1,11 +1,13 @@
+using BattleshipWithWords.Controllers.Multiplayer.Setup;
+
 namespace BattleshipWithWords.Services.Multiplayer.Setup;
 
-public class PlaceableState : ITileState
+public class TilePlaceableState : ITileState
 {
     private TileController _controller;
     private ITileState _originalState;
 
-    public PlaceableState(TileController controller, ITileState originalState)
+    public TilePlaceableState(TileController controller, ITileState originalState)
     {
         _controller = controller;
         _originalState = originalState;

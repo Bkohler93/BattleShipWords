@@ -1,7 +1,7 @@
 using BattleshipWithWords.Networkutils;
 using Godot;
 
-namespace BattleshipWithWords.Services.Scenes;
+namespace BattleshipWithWords.Controllers;
 
 public class SinglePlayerGameScene : IScene
 {

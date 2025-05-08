@@ -1,7 +1,6 @@
 using System;
-using BattleshipWithWords.Services.Multiplayer.Setup.TileController.States;
 
-namespace BattleshipWithWords.Services.Multiplayer.Setup.TileController;
+namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
 public class TileController
 {
@@ -26,7 +25,7 @@ public class TileController
     public void Reset()
     {
         _tileNode.LetterLabel.Text = "";
-        TransitionTo(new IdleState(this));
+        TransitionTo(new TileIdleState(this));
     }
 
     // public void HandleSelect(bool hasConflict)

@@ -37,4 +37,9 @@ public static class SceneTransitions
             .SetTrans(Tween.TransitionType.Linear)
             .SetEase(Tween.EaseType.In);
     }
+
+    public static void GameExit(Control node, Tween tween, TransitionDirection direction)
+    {
+        node.Hide();
+    }
 }

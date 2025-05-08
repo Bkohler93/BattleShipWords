@@ -1,34 +1,120 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
+using Godot;
+using Godot.Collections;
 
 namespace BattleshipWithWords.Services.GameManager;
 
-public class RemoteGameState
+public class RemoteGameStateManager
 {
-    private Dictionary<char, List<(int row, int col, int wordIndex, int letterIndexInWord)>> _letterToLocations;
+    private System.Collections.Generic.Dictionary<char, List<(int row, int col, int wordIndex, int letterIndexInWord)>> _letterToLocations;
     private List<HiddenWordState> _hiddenWords;
-    private HashSet<(int row, int col)> _foundCoords;
+    private HashSet<(int row, int col)> _foundCoords = new();
 
-    public ProcessGuessResponse ProcessWordGuess(string word)
+    public static RemoteGameStateManager FromSetup(List<string> words, List<List<(int row, int col)>> boardSelections)
+    { 
+        var letterToLocations = new System.Collections.Generic.Dictionary<char, List<(int row, int col, int wordIndex, int letterIndexInWord)>>();
+        var hiddenWords = new List<HiddenWordState>(); 
+        var foundCoords = new HashSet<(int row, int col)>();
+        
+        for (var i = 0; i < 3; i++)
+        {
+            var word = words[i];
+            var hiddenWordState = new HiddenWordState(word);
+            hiddenWords.Add(hiddenWordState);
+            var wordBoardSelections = boardSelections[i];
+            for (var j = 0; j < word.Length; j++)
+            {
+                hiddenWordState.Positions.Add((wordBoardSelections[j].row, wordBoardSelections[j].col));
+                if (letterToLocations.ContainsKey(word[j]))
+                {
+                    var letterLocations = letterToLocations[word[j]];
+                    letterLocations.Add((wordBoardSelections[j].row, wordBoardSelections[j].col, i, j));
+                }
+                else
+                {
+                    letterToLocations[word[j]] = [(wordBoardSelections[j].row, wordBoardSelections[j].col, i, j)];
+                }
+            }
+        }
+        return new RemoteGameStateManager()
+        {
+            _letterToLocations = letterToLocations,
+            _hiddenWords = hiddenWords,
+            _foundCoords = foundCoords,
+        };
+    }
+
+    public override string ToString()
+    {
+        var s = "";
+        for (var i = 0; i < 3; i++)
+        {
+            s += $"{_hiddenWords[i].Word}: LettersFound=(";
+            foreach (var b in _hiddenWords[i].LettersFound)
+            {
+                s += $"{b},";
+            }
+
+            s += ")\n";
+
+            s += "WordPositions=(";
+            foreach (var (row, col) in _hiddenWords[i].Positions)
+            {
+                s += $"{row}:{col},";
+            }
+            s += ")\n";
+        }
+
+        s += "Character Locations\n";
+        foreach (var (c, locations) in _letterToLocations)
+        {
+            s += $"{c}=[";
+            foreach (var (row, col, wordIndex, letterIndexInWord) in locations)
+            {
+                s += $"({row},{col},{wordIndex},{letterIndexInWord}),";
+            }
+            s += "]\n";
+        }
+        
+        return s;
+    }
+
+    public GuessResponse ProcessWordGuess(string word)
     {
         List<StringBuilder> responseWordBuilders = [new("---"), new("----"), new("-----")];
-        Dictionary<char, LetterResponseStatus> responseLetters = new();
+        System.Collections.Generic.Dictionary<char, LetterResponseStatus> responseLetters = new();
         bool doesPlayerGoAgain = _hiddenWords.Exists(hw => hw.Word == word);
         
-        for (var i = 0; i < word.Length; i++)
+        // find letters on game board
+        for (var guessWordIndex = 0; guessWordIndex < word.Length; guessWordIndex++)
         {
-            if (!responseLetters.ContainsKey(word[i]))
+            if (!responseLetters.ContainsKey(word[guessWordIndex]))
             {
-                responseLetters.Add(word[i], new LetterResponseStatus());
+                responseLetters.Add(word[guessWordIndex], new LetterResponseStatus());
             }
-            var letterResponseStatus = responseLetters[word[i]];
             
+            var letter = word[guessWordIndex];
+            if (!_letterToLocations.TryGetValue(letter, out var letterLocations))
+                continue;
+
+            foreach (var letterLocation in letterLocations.Where(letterLocation => letterLocation.letterIndexInWord == guessWordIndex))
+            {
+                _foundCoords.Add((letterLocation.row, letterLocation.col));
+                _hiddenWords[letterLocation.wordIndex].LettersFound[guessWordIndex] = true;
+                responseWordBuilders[letterLocation.wordIndex][letterLocation.letterIndexInWord] = word[guessWordIndex];
+            }
+        }
+        
+        // determine keyboard and tile statuses
+        for (var i=0;i<word.Length;i++)
+        {
             var letter = word[i];
-            bool isLetterFound = true;
-            bool isAllLetterWordsFound = true;
-            var letterLocations = _letterToLocations[letter];
-            if (letterLocations.Count == 0)
+            var letterResponseStatus = responseLetters[letter];
+            
+            if (!_letterToLocations.TryGetValue(letter, out var letterLocations))
             {
                 letterResponseStatus.KeyboardStatus = KeyboardLetterStatus.OutOfPlay;
                 continue;
@@ -38,47 +124,181 @@ public class RemoteGameState
             foreach (var letterLocation in letterLocations)
             {
                 hiddenWordIndicesContainingLetter.Add(letterLocation.wordIndex);
-                
-                if (isLetterFound && letterLocation.letterIndexInWord != i)
-                {
-                    letterResponseStatus.KeyboardStatus = KeyboardLetterStatus.InPlay;
-                    isLetterFound = false;
-                    isAllLetterWordsFound = false; 
-                }
-
-                if (letterLocation.letterIndexInWord == i)
-                {
-                    responseWordBuilders[letterLocation.wordIndex][letterLocation.letterIndexInWord] = word[i];
-                    _hiddenWords[letterLocation.wordIndex].LettersFound[i] = true;
-                    letterResponseStatus.FoundCoords.Add((letterLocation.row, letterLocation.col));
-                }
             }
-
-            if (!isAllLetterWordsFound) continue;
-            foreach (var index in hiddenWordIndicesContainingLetter)
+            
+            foreach (var letterLocation in letterLocations.Where(letterLocation => letterLocation.letterIndexInWord == i))
             {
-                if (!_hiddenWords[index].IsFound)
-                {
-                    isAllLetterWordsFound = false;
-                    break;
-                }
+                var status = _hiddenWords[letterLocation.wordIndex].IsFound ? GameTileStatus.WordFound : GameTileStatus.Uncovered;
+                letterResponseStatus.FoundCoords.Add((letterLocation.row, letterLocation.col, status));
             }
-                
-            if (isAllLetterWordsFound)
-                letterResponseStatus.KeyboardStatus = KeyboardLetterStatus.OutOfPlay;
+            
+            KeyboardLetterStatus keyboardLetterStatus;
+            
+            // check if all hidden words containing letter have been found
+            if (hiddenWordIndicesContainingLetter.All(index => _hiddenWords[index].IsFound))
+            {
+                keyboardLetterStatus = KeyboardLetterStatus.OutOfPlay;
+            }
+            // check if all instances of letter have been found
+            else if (letterLocations.All(tuple => _foundCoords.Contains((tuple.row, tuple.col))))
+            {
+                keyboardLetterStatus = KeyboardLetterStatus.AllFound;
+            }
             else
-                letterResponseStatus.KeyboardStatus = KeyboardLetterStatus.InPlay;
+            {
+                keyboardLetterStatus = KeyboardLetterStatus.InPlay;
+            }
+            // letterResponseStatus.KeyboardStatus = hiddenWordIndicesContainingLetter.Any(index => !_hiddenWords[index].IsFound) ? KeyboardLetterStatus.InPlay : KeyboardLetterStatus.OutOfPlay;
+            letterResponseStatus.KeyboardStatus = keyboardLetterStatus;
         }
+
+        TurnResult result;
+        if (_hiddenWords.All(hiddenWord => hiddenWord.IsFound))
+        {
+            result = TurnResult.Win;
+        }
+        else if (doesPlayerGoAgain)
+        {
+            result = TurnResult.GoAgain;
+        } 
+        else
+        {
+            result = TurnResult.TurnOver;
+        }
+        
+        GD.Print(result);
+        return new GuessResponse()
+        {
+            WordLetterStatus = responseWordBuilders.ConvertAll(b => b.ToString()),
+            ResponseLetters = responseLetters,
+            Result = result,
+        };
+    }
+
+    public UncoveredTileResponse ProcessTileUncovered(int coordsRow, int coordsCol)
+    {
+        List<StringBuilder> responseWordBuilders = [new("---"), new("----"), new("-----")];
+        var keyboardStatus = new System.Collections.Generic.Dictionary<char, KeyboardLetterStatus>();
+        var gameboardStatus = new List<(int row, int col, string letter, GameTileStatus status)>();
+        (int row, int col, string letter, GameTileStatus status) guessedTileStatus = (coordsRow, coordsCol, "", GameTileStatus.Uncovered);
+
+        _foundCoords.Add((coordsRow, coordsCol));
+        foreach (var (letter, letterToLocation) in _letterToLocations)
+        {
+            if (!letterToLocation.Exists((tuple => tuple.row == coordsRow && tuple.col == coordsCol))) continue;
+            guessedTileStatus.letter = letter.ToString();
+            var tuple = letterToLocation.Find(tuple => tuple.row == coordsRow && tuple.col == coordsCol);
+            _hiddenWords[tuple.wordIndex].LettersFound[tuple.letterIndexInWord] = true;
+            if (!_hiddenWords[tuple.wordIndex].IsFound)
+            {
+                var letterLocations = _letterToLocations[letter];
+                // find if all instances of this letter have been found
+                var allInstancesOfLetterFound = true;
+                foreach (var letterLocation in letterLocations)
+                {
+                    if (!_hiddenWords[letterLocation.wordIndex].LettersFound[letterLocation.letterIndexInWord])
+                        allInstancesOfLetterFound = false;
+                }
+                if (allInstancesOfLetterFound)
+                    keyboardStatus[letter] = KeyboardLetterStatus.AllFound;
+                else
+                    keyboardStatus[letter] = KeyboardLetterStatus.InPlay;
+                break;
+            } 
+            
+            var hiddenWord = _hiddenWords[tuple.wordIndex].Word;
+            
+            for (var i = 0; i < hiddenWord.Length; i++)
+            {
+                gameboardStatus.Add((_hiddenWords[tuple.wordIndex].Positions[i].row,_hiddenWords[tuple.wordIndex].Positions[i].col, hiddenWord[i].ToString(), GameTileStatus.WordFound));
+            }
+            
+            for (var i = 0; i < hiddenWord.Length; i++)
+            {
+                var hiddenWordLetter = hiddenWord[i];
+                    
+                var letterLocations = _letterToLocations[hiddenWordLetter];
+                    
+                // find if all hidden words that contain have been found
+                var uniqueWordIndices = new HashSet<int>();
+                foreach (var letterLocation in letterLocations)
+                    uniqueWordIndices.Add(letterLocation.wordIndex);
+                var allHiddenWordsWithLetterFound = true;
+                foreach (var uniqueWordIndex in uniqueWordIndices)
+                {
+                    if (!_hiddenWords[uniqueWordIndex].IsFound)
+                        allHiddenWordsWithLetterFound = false;
+                }
+
+                if (allHiddenWordsWithLetterFound)
+                {
+                    keyboardStatus[hiddenWordLetter] = KeyboardLetterStatus.OutOfPlay;
+                    continue;
+                }
+                    
+                // find if all instances of this letter have been found
+                var allInstancesOfLetterFound = true;
+                foreach (var letterLocation in letterLocations)
+                {
+                    if (!_hiddenWords[letterLocation.wordIndex].LettersFound[letterLocation.letterIndexInWord])
+                        allInstancesOfLetterFound = false;
+                }
+                if (allInstancesOfLetterFound)
+                    keyboardStatus[hiddenWordLetter] = KeyboardLetterStatus.AllFound;
+                else
+                    keyboardStatus[hiddenWordLetter] = KeyboardLetterStatus.InPlay;
+            }
+        }
+        if (gameboardStatus.Count == 0)
+            gameboardStatus.Add(guessedTileStatus);
+
+        var result = _hiddenWords.All(hiddenWord => hiddenWord.IsFound) ? TurnResult.Win : TurnResult.TurnOver;
+        
+        return new UncoveredTileResponse()
+        {
+            WordLetterStatus = responseWordBuilders.ConvertAll(b => b.ToString()),
+            GameboardStatus = gameboardStatus,
+            KeyboardStatus = keyboardStatus,
+            Result = result,
+        };
     }
 }
 
-class LetterResponseStatus
+
+
+public class GuessResponse
 {
-    public List<(int row, int col)> FoundCoords = [];
+    public List<string> WordLetterStatus; // will have '-' for letters not yet found, and actual letters if found
+    public System.Collections.Generic.Dictionary<char, LetterResponseStatus> ResponseLetters = new(); 
+    public TurnResult Result;
+
+    public override string ToString()
+    {
+        var s = "Guess Response\n\nLetter Statuses\n";
+        foreach (var (letter, status) in ResponseLetters)
+        {
+            var keyboardStatus = status.KeyboardStatus;
+            s += $"{letter}: {keyboardStatus},";
+        }
+
+        return s;
+    }
+}
+
+
+public class LetterResponseStatus
+{
+    public List<(int row, int col, GameTileStatus status)> FoundCoords = [];
     public KeyboardLetterStatus KeyboardStatus;
 }
 
-enum KeyboardLetterStatus
+public enum GameTileStatus
+{
+    Uncovered,
+    WordFound,
+}
+
+public enum KeyboardLetterStatus
 {
     InPlay,
     AllFound,
@@ -88,7 +308,15 @@ enum KeyboardLetterStatus
 class HiddenWordState
 {
     public string Word;
-    public List<(int x, int y)> Positions; // Same order as in Word
+    public List<(int row, int col)> Positions = []; // Same order as in Word
     public bool[] LettersFound;            // Same length as Word
+
+    public HiddenWordState(string word)
+    {
+        Word = word;
+        LettersFound = word.Select(c => false).ToArray();
+    }
+
     public bool IsFound => LettersFound.All(b => b);
 }
+

@@ -28,7 +28,6 @@ swap
 jobs
 skim
 hulk
-wode
 tram
 ruin
 shop
@@ -56,7 +55,6 @@ root
 tray
 sail
 buff
-ista
 glad
 slut
 smug
@@ -88,14 +86,12 @@ laid
 lets
 mead
 firm
-lege
 wart
 dims
 kirk
 pale
 talk
 wane
-sono
 sway
 fare
 goal
@@ -126,7 +122,6 @@ tide
 duke
 mots
 aery
-usum
 ears
 horn
 gape
@@ -145,7 +140,6 @@ nows
 awed
 fere
 zone
-stig
 crop
 wolf
 hood
@@ -167,7 +161,6 @@ hose
 team
 gray
 jigs
-noli
 mash
 flux
 rank
@@ -176,14 +169,12 @@ babe
 joke
 quip
 dreg
-ipse
 pair
 clog
 cull
 real
 male
 dine
-duer
 ford
 digs
 gifs
@@ -210,7 +201,6 @@ wove
 dura
 gone
 tost
-fait
 boom
 beef
 desk
@@ -220,7 +210,6 @@ jail
 pops
 chew
 bout
-quoe
 mist
 earn
 text
@@ -298,7 +287,6 @@ safe
 chip
 wisp
 cart
-sauf
 slug
 nine
 bead
@@ -374,7 +362,6 @@ then
 soar
 lace
 snod
-wery
 hoar
 ewes
 viol
@@ -395,7 +382,6 @@ fibs
 neck
 espy
 flax
-cout
 elms
 evil
 town
@@ -413,13 +399,11 @@ near
 toad
 draw
 purr
-erga
 spun
 cord
 mart
 levy
 fops
-sait
 raft
 logs
 glib
@@ -456,7 +440,6 @@ acts
 wins
 seal
 fume
-fery
 rich
 ache
 bail
@@ -475,7 +458,6 @@ spin
 woke
 geck
 vase
-laff
 care
 past
 nook
@@ -493,7 +475,6 @@ glim
 yell
 boot
 peal
-oope
 made
 name
 hail
@@ -503,7 +484,6 @@ tyre
 maim
 fail
 furs
-quam
 chum
 spat
 duck
@@ -565,7 +545,6 @@ head
 bump
 tall
 rows
-bloo
 fear
 navy
 cash
@@ -632,7 +611,6 @@ laud
 boil
 span
 vine
-toto
 mast
 most
 road
@@ -662,7 +640,6 @@ coal
 bang
 alit
 hurt
-cale
 torn
 wert
 user
@@ -676,7 +653,6 @@ bays
 milk
 gets
 cake
-grup
 know
 rent
 gulf
@@ -685,7 +661,6 @@ doxy
 bung
 seat
 fuel
-quig
 snap
 fang
 plus
@@ -723,7 +698,6 @@ pane
 tubs
 gems
 buoy
-orld
 blue
 date
 rang
@@ -741,11 +715,9 @@ irks
 swan
 keen
 maul
-goin
 peek
 rush
 limb
-dood
 sale
 zero
 cold
@@ -771,7 +743,6 @@ plue
 lour
 taks
 week
-digt
 very
 prey
 solo
@@ -779,11 +750,9 @@ unto
 sake
 plot
 mace
-assa
 huge
 sort
 west
-sont
 tale
 lens
 nips
@@ -800,7 +769,6 @@ suck
 mans
 hold
 clip
-thof
 save
 luff
 wand
@@ -827,7 +795,6 @@ turf
 haps
 hent
 tiff
-yuse
 says
 bend
 vows
@@ -936,7 +903,6 @@ load
 garb
 bird
 pots
-dess
 away
 gain
 halt
@@ -955,7 +921,6 @@ foil
 curl
 disc
 gang
-gawm
 miss
 anon
 tool
@@ -970,7 +935,6 @@ cinq
 held
 atom
 cram
-vais
 pill
 trip
 gaps
@@ -995,15 +959,12 @@ reft
 zest
 with
 wall
-layn
 bibs
 lush
 dean
 writ
 crew
-goot
 fern
-niel
 knew
 jilt
 puma
@@ -1020,7 +981,6 @@ cabs
 vast
 lead
 grub
-tous
 dank
 wash
 ones
@@ -1032,9 +992,7 @@ bury
 sulk
 fret
 gnat
-poys
 geld
-foro
 step
 grew
 sell
@@ -1049,9 +1007,7 @@ miry
 hide
 help
 wise
-knog
 smit
-argy
 need
 deny
 felt
@@ -1083,7 +1039,6 @@ legs
 gilt
 pony
 firk
-chud
 deil
 agin
 here
@@ -1091,10 +1046,8 @@ holp
 same
 fast
 bale
-quis
 them
 than
-ober
 edge
 puts
 foam
@@ -1155,10 +1108,8 @@ lore
 sing
 crab
 sins
-druv
 foul
 mold
-dild
 stud
 have
 pity
@@ -1172,7 +1123,6 @@ clew
 give
 dear
 daze
-mais
 stem
 echo
 swum
@@ -1186,7 +1136,6 @@ dram
 bold
 soon
 hade
-joci
 onto
 took
 gown
@@ -1203,7 +1152,6 @@ daws
 deck
 camp
 shog
-alle
 shew
 murk
 only
@@ -1264,7 +1212,6 @@ deal
 twig
 pens
 taxi
-vero
 bier
 fans
 side
@@ -1272,7 +1219,6 @@ fogs
 boss
 oval
 toys
-huom
 alma
 kill
 gasp
@@ -1281,7 +1227,6 @@ wawl
 loud
 slay
 fain
-mout
 doff
 aims
 papa
@@ -1328,7 +1273,6 @@ wipe
 heir
 yawn
 oozy
-dawg
 east
 axis
 item
@@ -1348,7 +1292,6 @@ spet
 jean
 marm
 lice
-veux
 amen
 daft
 rant
@@ -1356,7 +1299,6 @@ folk
 coat
 curb
 tuft
-demi
 shot
 jogs
 coup
@@ -1397,7 +1339,6 @@ woof
 slum
 porn
 nags
-vous
 mars
 bobs
 pang
@@ -1421,7 +1362,6 @@ thou
 gate
 kink
 vial
-dese
 lime
 crib
 hope
@@ -1430,12 +1370,10 @@ neat
 park
 core
 tank
-suis
 rape
 free
 alas
 cony
-glew
 mass
 belt
 sits
@@ -1461,7 +1399,6 @@ toss
 undo
 chop
 sips
-cuck
 wore
 dewy
 lint
@@ -1476,7 +1413,6 @@ buss
 sord
 beat
 twin
-omne
 gong
 ibis
 grip
@@ -1504,18 +1440,14 @@ tipt
 dish
 musk
 wren
-furz
 upon
 sect
-eber
-eget
 mihi
 grey
 limp
 comb
 balk
 were
-dès
 grow
 fate
 rose
@@ -1556,7 +1488,6 @@ auld
 slam
 sage
 plod
-fais
 snug
 abed
 hove
@@ -1566,7 +1497,6 @@ wont
 pelt
 cats
 toge
-fois
 four
 gall
 hilt
@@ -1580,7 +1510,6 @@ avow
 ends
 hoof
 flea
-avez
 lade
 type
 tars
@@ -1628,7 +1557,6 @@ bell
 tyro
 pump
 pout
-deux
 blur
 just
 they
@@ -1644,7 +1572,6 @@ rule
 rope
 dial
 coax
-raal
 hies
 nose
 doom
@@ -1685,7 +1612,6 @@ uses
 jury
 salt
 wort
-aint
 mazy
 harp
 hits
@@ -1698,7 +1624,6 @@ eche
 plug
 rags
 pare
-ibat
 lift
 weld
 cozy
@@ -1787,7 +1712,6 @@ joys
 flag
 alow
 boar
-arsk
 serf
 smut
 tare
@@ -1796,7 +1720,6 @@ what
 hast
 howl
 beck
-soit
 pass
 odds
 size

@@ -1,9 +1,11 @@
 using System.Runtime.InteropServices;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Services.GameManager;
+using BattleshipWithWords.Nodes.Menus;
 using Godot;
 
-namespace BattleshipWithWords.Services.Scenes;
+namespace BattleshipWithWords.Controllers;
 
 public class LocalMatchmakingScene : IScene
 {
@@ -34,9 +36,12 @@ public class LocalMatchmakingScene : IScene
         {
             _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
-        localMatchmaking.StartGame = (peerId, id) =>
+        localMatchmaking.StartGame = () =>
         {
-            var gameManager = new MultiplayerGameManager(peerId, id);
+            var gameManager = new MultiplayerGameManager();
+            _sceneManager.GetRoot().AddChild(gameManager);
+            gameManager.Init();
+            _sceneManager.HookPeerDisconnected(gameManager);
             _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         _node = localMatchmaking;
