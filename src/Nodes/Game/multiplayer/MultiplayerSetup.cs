@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
-public partial class MultiplayerSetup : MarginContainer
+public partial class MultiplayerSetup : MarginContainer, ISceneNode
 {
+    private List<Node> _nodesToKeepAlive = [];
     private float _separationGap = 40f/6f; 
     
     [Export] private GridContainer _gridContainer;
@@ -24,8 +26,6 @@ public partial class MultiplayerSetup : MarginContainer
     [Export] private StyleBox _placeableStyleBox;
     [Export] private StyleBox _placedStyleBox;
     [Export] private StyleBox _pendingFailedStyleBox;
-    
-    public Action<List<string>,List<List<(int row, int col)>>> SetupCompleteCallback;
     
     public override void _Ready()
     {
@@ -102,4 +102,13 @@ public partial class MultiplayerSetup : MarginContainer
         }
     }
 
+    public List<Node> GetNodesToShare()
+    {
+        return _nodesToKeepAlive;
+    }
+
+    public void AddNodeToShare(Node node)
+    {
+        _nodesToKeepAlive.Add(node);
+    }
 }

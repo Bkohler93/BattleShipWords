@@ -1,0 +1,30 @@
+;
+; © 2024-present https://github.com/bkohkler93
+;
+
+[config]
+
+name="PeerFinderPlugin"
+binary="PeerFinderPlugin.xcframework"
+initialization="PeerFinderPlugin_init"
+deinitialization="PeerFinderPlugin_deinit"
+use_swift_runtime=true
+
+
+[dependencies]
+
+linked=[]
+embedded=[]
+system=["Foundation.framework","CryptoKit.framework"]
+capabilities=[]
+files=[]
+linker_flags=["-ObjC","-Wl,-weak-lswiftCore,-weak-lswiftObjectiveC,-weak-lswift_Concurrency"]
+
+
+[plist]
+NSLocalNetworkUsageDescription:string="We need to access network services for discovering local peers to play with."
+NSBonjourServices:raw="
+<array>
+	<string>_peerfinder._tcp</string>
+</array>
+"

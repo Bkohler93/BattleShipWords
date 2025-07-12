@@ -1,141 +1,135 @@
 using System;
 using System.Collections.Generic;
+using androidplugintest.ConnectionManager;
 using BattleshipWithWords.Services.GameManager;
 using Godot;
 using Godot.Collections;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Game;
 
-public partial class MultiplayerGameManager : Node
+public partial class MultiplayerGameManager
 {
-    private long _peerId;
-    private long _id;
-    private bool _waitingOnOtherPlayer;
-
     public RemoteGameStateManager PlayerTwoGameStateManager;
-    private Queue<MultiplayerMessage> _remoteMessageQueue = new();
+    private P2PConnectionManager _connectionManager;
+    // private Queue<MultiplayerMessage> _remoteMessageQueue = new();
     private MultiplayerGameManagerStateMachine _stateMachine;
-    public event Action SetupComplete;
+
+    public void SetConnectionListener(IP2PConnectionListener listener)
+    {
+        _connectionManager.SetListener(listener);
+    }
+
+    public MultiplayerGameManager(P2PConnectionManager connectionManager)
+    {
+        _connectionManager = connectionManager;
+        _stateMachine = new MultiplayerGameManagerStateMachine(this);
+    }
+
+    public Action<SetupSceneUpdate> SetupUpdated;
+    public event Action<UIUpdate> OpponentUIUpdated;
+    public event Action<UIUpdate> LocalUIUpdated;
+    public event Action BothSetupsCompleted;
     public event Action<WordGuessedResponseData> GuessResultReceived;
     public event Action<UncoveredTileResponse> TileUncoverResultReceived;
-    public event Action<WordGuessedResponseData> OpponentGuessed;
-    public event Action<UncoveredTileResponse> OpponentUncoveredTile;
-    public event Action OpponentBackspacePressed;
-    public event Action<string> OpponentKeyPressed;
     public event Action GameWon;
     public event Action GameLost;
     public event MultiplayerApi.PeerDisconnectedEventHandler PeerDisconnected;
 
-    public void Init()
-    {
-        _id = Multiplayer.MultiplayerPeer.GetUniqueId();
-        _peerId = Multiplayer.GetPeers()[0];
-        Multiplayer.PeerDisconnected += (disconnectedPeerId) => PeerDisconnected!(disconnectedPeerId);
-        _stateMachine = new MultiplayerGameManagerStateMachine(new SettingUp(this), this);
-    }
-
-    public override void _ExitTree()
-    {
-        SetupComplete = null; 
-        GuessResultReceived = null;
-        TileUncoverResultReceived = null;
-        OpponentGuessed = null;
-        OpponentUncoveredTile = null;
-        OpponentBackspacePressed = null;
-        OpponentKeyPressed = null;
-        GameWon = null;
-        GameLost = null;
-    }
+    //TODO disconnect events somewhere....
+    // public override void _ExitTree()
+    // {
+    //     SetupComplete = null; 
+    //     GuessResultReceived = null;
+    //     TileUncoverResultReceived = null;
+    //     OpponentGuessed = null;
+    //     OpponentUncoveredTile = null;
+    //     OpponentBackspacePressed = null;
+    //     OpponentKeyPressed = null;
+    //     GameWon = null;
+    //     GameLost = null;
+    // }
 
     public bool  PlayerTwoReady { get; private set; }
-    public long LocalId => _id; 
 
     private void _sendSetupReady()
     {
         var msg = new MultiplayerMessage(MultiplayerMessageType.Setup, null);
-        RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
+        _connectionManager.Send(msg);
+        // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
     
-    [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void Rpc_Send(Dictionary data)
-    {
-        var msg = MultiplayerMessage.From(data);
-        _remoteMessageQueue.Enqueue(msg);
-    }
+    // [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    // public void Rpc_Send(Dictionary data)
+    // {
+    //     var msg = MultiplayerMessage.From(data);
+    //     _remoteMessageQueue.Enqueue(msg);
+    // }
 
-    public void CompleteLocalSetup(List<string> words, List<List<(int row, int col)>> boardSelection)
-    {
-        PlayerTwoGameStateManager = RemoteGameStateManager.FromSetup(words, boardSelection);
-        _stateMachine.TransitionTo(new SetupComplete(this, _stateMachine));
-        _sendSetupReady();
-    }
-
-    public override void _Process(double delta)
-    {
-        while (_remoteMessageQueue.TryPeek(out var msg))
-        {
-            if (_stateMachine.TryProcessRemote(msg)) _remoteMessageQueue.Dequeue();
-            else
-                break;
-        }
-    }
-
-    public void SetWaiting()
-    {
-        _waitingOnOtherPlayer = true;
-    }
+    //TODO process incoming messages
+    // public override void _Process(double delta)
+    // {
+    //     while (_remoteMessageQueue.TryPeek(out var msg))
+    //     {
+    //         if (_stateMachine.TryProcessRemote(msg)) _remoteMessageQueue.Dequeue();
+    //         else
+    //             break;
+    //     }
+    // }
 
     public void StartGame()
     {
-        SetupComplete?.Invoke();
+        BothSetupsCompleted?.Invoke();
     }
 
     public void DisconnectAndFree()
     {
-        Multiplayer.MultiplayerPeer.Close();
-        Multiplayer.MultiplayerPeer = null;
-        QueueFree();
+        //TODO maybe change this
+        _connectionManager.Disable();
+        // Multiplayer.MultiplayerPeer.Close();
+        // Multiplayer.MultiplayerPeer = null;
+        // QueueFree();
     }
 
-    public void GuessMadeEventHandler(string guessedWord)
-    {
-        if (_stateMachine.CurrentState is not PlayingState) return;
-        
-        var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
-        {
-            Type = PlayingDataType.Event,
-            Data = new PlayingEventData()
-            {
-                Type = EventType.GuessedWord,
-                Data = new GuessedWordData()
-                {
-                    Word = guessedWord,
-                },
-            }
-        });
-        RpcId(_peerId, nameof(Rpc_Send),msg.Serialize());
-    }
+    // public void GuessMadeEventHandler(string guessedWord)
+    // {
+    //     if (_stateMachine.CurrentState is not PlayingState) return;
+    //     
+    //     var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
+    //     {
+    //         Type = PlayingDataType.Event,
+    //         Data = new PlayingEventData()
+    //         {
+    //             Type = EventType.GuessedWord,
+    //             Data = new GuessedWordData()
+    //             {
+    //                 Word = guessedWord,
+    //             },
+    //         }
+    //     });
+    //     _connectionManager.Send(msg);
+    //     // RpcId(_peerId, nameof(Rpc_Send),msg.Serialize());
+    // }
 
-    public void TileUncoveredEventHandler((int row, int col) coord)
-    {
-        if (_stateMachine.CurrentState is not PlayingState) return;
-
-        var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
-        {
-            Type = PlayingDataType.Event,
-            Data = new PlayingEventData()
-            {
-                Type = EventType.UncoveredTile,
-                Data = new UncoveredTileData()
-                {
-                    Row = coord.row,
-                    Col = coord.col,
-                }
-            }
-        });
-        
-        RpcId(_peerId, nameof(Rpc_Send),msg.Serialize());
-    }
+    // public void TileUncoveredEventHandler((int row, int col) coord)
+    // {
+    //     if (_stateMachine.CurrentState is not PlayingState) return;
+    //
+    //     var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
+    //     {
+    //         Type = PlayingDataType.Event,
+    //         Data = new PlayingEventData()
+    //         {
+    //             Type = EventType.UncoveredTile,
+    //             Data = new UncoveredTileData()
+    //             {
+    //                 Row = coord.row,
+    //                 Col = coord.col,
+    //             }
+    //         }
+    //     });
+    //     _connectionManager.Send(msg); 
+    //     // RpcId(_peerId, nameof(Rpc_Send),msg.Serialize());
+    // }
 
     public void LocalBackspacePressedEventHandler()
     {
@@ -148,7 +142,8 @@ public partial class MultiplayerGameManager : Node
             }
         };
         var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, playingData);
-        RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
+        _connectionManager.Send(msg);
+        // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
     public void LocalKeyPressedEventHandler(string key)
@@ -165,17 +160,23 @@ public partial class MultiplayerGameManager : Node
                 },
             },
         });
-        RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
+        _connectionManager.Send(msg);
+        // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
-    public void OpponentPressBackspace()
+    public void LocalUpdateHandler(UIEvent @event)
     {
-        OpponentBackspacePressed?.Invoke();
+        _stateMachine.ProcessLocalUpdate(@event);
     }
 
-    public void OpponentPressKey(string key)
+    public void UpdateLocalUI(UIUpdate uiEvent)
     {
-        OpponentKeyPressed?.Invoke(key); 
+        LocalUIUpdated?.Invoke(uiEvent);
+    }
+    
+    public void UpdateOpponentUI(UIUpdate uiEvent)
+    {
+        OpponentUIUpdated?.Invoke(uiEvent);
     }
 
     public void ProcessOpponentWordGuess(string word)
@@ -213,8 +214,15 @@ public partial class MultiplayerGameManager : Node
                 Data = data,
             }
         });
-        OpponentGuessed?.Invoke(data);
-        RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
+        
+        OpponentUIUpdated?.Invoke(new UIUpdate
+        {
+            Type = UIUpdateType.GuessedWord,
+            Data = data, 
+        });
+        // OpponentGuessed?.Invoke(data);
+        _connectionManager.Send(msg);
+        // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
     public void UpdateLocalGameFromWordGuess(WordGuessedResponseData data)
@@ -235,37 +243,24 @@ public partial class MultiplayerGameManager : Node
         
         // if (!data.DoesPlayerGoAgain) 
         //    _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
+        ;
+        UpdateLocalUI(new UIUpdate
+        {
+            Type = UIUpdateType.GuessedWord,
+            Data =new WordGuessedResponseData() 
+            {
+                Result = TurnResult.GoAgain,
+                ResponseLetters = null,
+                WordLetterStatus = null
+            }
+        });
         GuessResultReceived?.Invoke(data);
     }
 
     public void ProcessOpponentUncoverTile(int coordsRow, int coordsCol)
     {
-        var res = PlayerTwoGameStateManager.ProcessTileUncovered(coordsRow, coordsCol);
-        switch (res.Result)
-        {
-            case TurnResult.GoAgain:
-                break;
-            case TurnResult.Win:
-                _stateMachine.TransitionTo(new GameOverState(_stateMachine, this, false));
-                break;
-            case TurnResult.TurnOver:
-                _stateMachine.TransitionTo(new PlayingState(_stateMachine, this));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
-        {
-            Type = PlayingDataType.Response,
-            Data = new PlayingResponseData()
-            {
-                Type = ResponseType.TileUncovered,
-                Data = res,
-            }
-        });
-        OpponentUncoveredTile?.Invoke(res); 
-        RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
+        
+        // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
     public void UpdateLocalFromUncoverTile(UncoveredTileResponse uncoverTileData)
@@ -295,5 +290,51 @@ public partial class MultiplayerGameManager : Node
     {
         GameLost?.Invoke();
     }
+
+    public bool IsHost()
+    {
+        return _connectionManager.IsHost();
+    }
+
+
+    public void SendPlayingResponse(ResponseType type, IResponseData data)
+    {
+        var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
+        {
+            Type = PlayingDataType.Response,
+            Data = new PlayingResponseData()
+            {
+                Type = type,
+                Data = data,
+            }
+        });
+        _connectionManager.Send(msg);
+    }
+
+    public void SendSetupComplete()
+    {
+        var msg = new MultiplayerMessage(MultiplayerMessageType.Setup, null);
+        _connectionManager.Send(msg);
+    }
+
+    public void SendPlayingEvent(EventType type, IEventData eventData)
+    {
+        var msg = new MultiplayerMessage(MultiplayerMessageType.Playing, new PlayingData()
+        {
+            Type = PlayingDataType.Event,
+            Data = new PlayingEventData()
+            {
+                Type = type,
+                Data = eventData, 
+            }
+        });
+        _connectionManager.Send(msg);
+    }
+}
+
+public enum SetupSceneUpdate
+{
+    WaitingForOtherPlayer,
+    SetupComplete
 }
 

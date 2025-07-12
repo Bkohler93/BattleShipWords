@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -7,6 +8,7 @@ public class InternetMatchmakingScene : IScene
 {
     private SceneManager _sceneManager;
     private OverlayManager _overlayManager;
+    private InternetMatchmaking _node;
 
     public InternetMatchmakingScene(SceneManager sceneManager, OverlayManager overlayManager)
     {
@@ -31,7 +33,23 @@ public class InternetMatchmakingScene : IScene
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
-            
+
+        _node = matchmaking;
         return matchmaking;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _node.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _node.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _node;
     }
 }

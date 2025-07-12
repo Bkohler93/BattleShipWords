@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using Godot;
@@ -32,5 +33,20 @@ public class MultiplayerTurnDeciderScene : IScene
     public Node Create()
     {
         throw new System.NotImplementedException();
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _node.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _node.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _node;
     }
 }

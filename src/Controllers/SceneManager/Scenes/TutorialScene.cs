@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -32,5 +33,20 @@ public class TutorialScene : IScene
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         return tutorial;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _tutorial.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _tutorial.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _tutorial;
     }
 }

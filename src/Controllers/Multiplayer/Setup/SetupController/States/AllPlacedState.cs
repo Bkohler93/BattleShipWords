@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using Godot;
+using Godot.Collections;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
@@ -22,7 +25,6 @@ public class AllPlacedState: SetupState
 
     public override void HandleConfirmButton()
     {
-        GD.Print("======== State To Send To Other Player =========");
         for (var i = 0; i < 3; i++)
         {
             var s =$"'{_controller.SelectedWords[i]}' placed at: ";
@@ -30,11 +32,12 @@ public class AllPlacedState: SetupState
             {
                 s += $"({coord.row},{coord.col}),";
             } 
-            GD.Print(s);
         }
-        GD.Print("================================================");
-        // _controller.GameManager.InitPlayerTwoGameState(_controller.SelectedWords, _controller.BoardSelection);
-        _controller.SetupNode.SetupCompleteCallback(_controller.SelectedWords, _controller.BoardSelection);
+        _controller.GameManager.LocalUpdateHandler(new UIEvent
+        {
+            Type = EventType.SetupCompleted,
+            Data = new SetupCompletedEventData(_controller.SelectedWords, _controller.BoardSelection) 
+        });
     }
 
     public override void HandleNextWordsButton()
@@ -45,5 +48,21 @@ public class AllPlacedState: SetupState
     public override void HandlePreviousWordsButton()
     {
         _controller.OnPreviousWordsButtonPressed();
+    }
+}
+
+public class SetupCompletedEventData : UIEventData, IEventData
+{
+    public List<string> SelectedWords;
+    public List<List<(int row, int col)>> SelectedGridCoordinates;
+    public SetupCompletedEventData(List<string> selectedWords, List<List<(int row, int col)>> selectedGridCoordinates)
+    {
+        SelectedWords = selectedWords;
+        SelectedGridCoordinates = selectedGridCoordinates;
+    }
+
+    public Dictionary ToDictionary()
+    {
+        throw new System.NotImplementedException();
     }
 }

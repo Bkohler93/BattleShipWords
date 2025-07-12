@@ -1,18 +1,22 @@
 using System;
-using System.Runtime.InteropServices;
-using BattleshipWithWords.Networkutils;
+using System.Collections.Generic;
+using androidplugintest.ConnectionManager;
+using androidplugintest.PeerFinderPlugin;
+using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Nodes.Menus;
-using BattleshipWithWords.Services;
 using Godot;
 
-namespace BattleshipWithWords.Controllers.Multiplayer;
+namespace BattleshipWithWords.Controllers.Multiplayer.LocalMatchmakingController;
 
-public class LocalMatchmakingController
+public class LocalMatchmakingController 
 {
     private LocalMatchmaking _matchmakingNode;
-    private ILocalMatchmakingState _currentState;
-    public long MultiplayerPeerId;
-    public long MultiplayerId;
+    public P2PConnectionManager ConnectionManager;
+    public PeerFinder PeerFinder;
+    private LocalMatchmakingState _currentState;
+
+    private readonly List<ServiceInfo> _peerList = [];
+    private int _selectedPeerIndex;
 
     public LocalMatchmakingController(LocalMatchmaking matchmakingNode)
     {
@@ -24,36 +28,12 @@ public class LocalMatchmakingController
         _currentState.OnBackPressed(); 
     }
 
-    private void OnServerDisconnected()
-    {
-        GD.Print("LocalMatchmakingController: Server disconnected");
-        DisplayUpdate("Server disconnected... Go back to try again");
-        TransitionTo(new DiscoveringState(this));
-    }
-
-    private void OnConnectedToServer()
-    {
-        GD.Print("LocalMatchmakingController: Connected to server");
-    }
-
-    private void OnPeerConnected(long id)
-    {
-        GD.Print($"Peer connected with id {id}");
-    }
-
-    private void OnPeerDisconnected(long id)
-    {
-        GD.Print($"LocalMatchmakingController::OnPeerDisconnected({id})");
-        DisplayUpdate($"Peer disconnected... ");
-        AssignMultiplayerPeer(null);
-        TransitionTo(new DiscoveringState(this));
-    }
-
-    public void TransitionTo(ILocalMatchmakingState newState)
+    public void TransitionTo(LocalMatchmakingState newState)
     {
         if (_currentState == newState) return;
         _currentState?.Exit();
         _currentState = newState;
+        ConnectionManager.SetListener(_currentState);
         _currentState.Enter();
     }
 
@@ -62,284 +42,99 @@ public class LocalMatchmakingController
         _matchmakingNode.StatusLabel.Text = status;
     }
 
-    public void DisplayUpdate(string update)
-    {
-        _matchmakingNode.UpdateLabel.Text = update;
-    }
-
     public void BackToMenu()
     {
         _currentState?.Exit();
-        DetachMultiplayerSignals();
+        // GD.Print("LocalMatchmakingController: Back to Menu -- about to detach multiplayer signals");
+        // DetachMultiplayerSignals();
         _matchmakingNode.BackToMainMenu.Invoke();
     }
 
-    public void AssignMultiplayerPeer(ENetMultiplayerPeer peer)
+    public void CompleteMatchmaking()
     {
-        if (peer == null)
-            _matchmakingNode.Multiplayer.MultiplayerPeer.Close();
-        _matchmakingNode.Multiplayer.MultiplayerPeer = peer;
-    }
-
-    public void DisplayPlayStatus()
-    {
-        _matchmakingNode.PlayButton.Show();
-        _matchmakingNode.StatusLabel.Text = "Press Play to start!";
-        _matchmakingNode.UpdateLabel.Text = "=)";
-    }
-
-    public void DisconnectMultiplayerPeer()
-    {
-        _matchmakingNode.Multiplayer.MultiplayerPeer.Close();
-        _matchmakingNode.Multiplayer.MultiplayerPeer = null;
-    }
-
-    public void ExitMatchmaking()
-    {
-        DetachMultiplayerSignals();
+        GD.Print("completing matchmaking");
+        _matchmakingNode.PersistSharingNodes();
         _matchmakingNode.StartGame.Invoke();
     }
 
-    public void DetachMultiplayerSignals()
+    public void Init(IP2PPeerService peerService)
     {
-        _matchmakingNode.Multiplayer.PeerDisconnected -= OnPeerDisconnected;
-        _matchmakingNode.Multiplayer.PeerConnected -= OnPeerConnected;
-        _matchmakingNode.Multiplayer.ConnectedToServer -= OnConnectedToServer;
-        _matchmakingNode.Multiplayer.ServerDisconnected -= OnServerDisconnected;
-    }
-
-    public void AttachMultiplayerSignals()
-    {
-        _matchmakingNode.Multiplayer.PeerDisconnected += OnPeerDisconnected;
-        _matchmakingNode.Multiplayer.PeerConnected += OnPeerConnected;
-        _matchmakingNode.Multiplayer.ConnectedToServer += OnConnectedToServer;
-        _matchmakingNode.Multiplayer.ServerDisconnected += OnServerDisconnected;
+        ConnectionManager = new P2PConnectionManager(peerService);
+        PeerFinder = new PeerFinder();
+        TransitionTo(new InitialState(this));
+        // var result = ConnectionManager.CreateServer();
+        // if (!result.Success)
+        // {
+        //     TransitionTo(new ErrorState(this));
+        // }
+        // TransitionTo(new DiscoveringState(this));
     }
     
-
-    public void OnPlayPressed()
+    public void HideActionButton()
     {
-        _currentState.OnPlayPressed();
+        _matchmakingNode.ActionButton.Hide();
     }
 
-    public void OnPeerPressedPlay()
+    public void AddDiscoveredPeer(ServiceInfo serviceInfo)
     {
-        _currentState.OnPeerPlayPressed();
-    }
-
-    public void Init()
-    {
-        AttachMultiplayerSignals(); 
-        TransitionTo(new DiscoveringState(this));
-    }
-
-    public bool TestConnection()
-    {
-        var isConnected =_matchmakingNode.Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected;
-        if (isConnected)
+        if (!_peerList.Exists((info => info.PeerName == serviceInfo.PeerName)))
         {
-            MultiplayerId = _matchmakingNode.Multiplayer.GetUniqueId();
-            MultiplayerPeerId = _matchmakingNode.Multiplayer.GetPeers()[0];
-        }
-        return isConnected;
-    }
-
-    public void AttachOnPeerConnected(MultiplayerApi.PeerConnectedEventHandler onPeerConnected)
-    {
-        _matchmakingNode.Multiplayer.PeerConnected += onPeerConnected;
-    }
-
-    public void DetachOnPeerConnected(MultiplayerApi.PeerConnectedEventHandler onPeerConnected)
-    {
-        _matchmakingNode.Multiplayer.PeerConnected -= onPeerConnected;
-    }
-
-    public void HidePlayButton()
-    {
-        _matchmakingNode.PlayButton.Hide();
-    }
-
-    public void SetPeerReady()
-    {
-        PeerReady = true;
-    }
-
-    public bool PeerReady { get; set; }
-}
-
-public class DiscoveringState : ILocalMatchmakingState,ILocalPeerFinderConnector 
-{
-    private LocalMatchmakingController _controller;
-    private ILocalPeerFinder _peerFinder;
-    private ILocalMatchmakingState _nextState;
-    private ENetMultiplayerPeer _hostPeer;
-    private int _hostPort;
-    private ENetMultiplayerPeer _clientPeer;
-    
-    public DiscoveringState(LocalMatchmakingController localMatchmakingController)
-    {
-        _controller = localMatchmakingController;
-        var factory = new LocalPeerFinderFactory();
-        _peerFinder = factory.Create(PlatformUtils.GetPlatform());
-        _peerFinder.ConnectSignals(this);
-    }
-
-    public override void Enter()
-    {
-        _hostPort =_peerFinder.StartService();
-        _hostPeer = new ENetMultiplayerPeer();
-        var err = _hostPeer.CreateServer(_hostPort);
-        if (err != Error.Ok)
+            _peerList.Add(serviceInfo);
+            _matchmakingNode.DiscoveredPeers.AddItem(serviceInfo.PeerName);
+        } else if (serviceInfo.IpVersion == IpVersion.IPv4)
         {
-            GD.Print("LocalMatchmakingController::DiscoveringState::Enter(): Failed to create server");     
-        }
-
-        _controller.AttachOnPeerConnected(_onPeerConnected);
-        _controller.AssignMultiplayerPeer(_hostPeer);
-        _peerFinder.StartListening();
-    }
-
-    private void _onPeerConnected(long id)
-    {
-        GD.Print($"connected to peer {id}"); 
-        _controller.DetachOnPeerConnected(_onPeerConnected);
-        _nextState = new ConfirmingState(_controller);
-        _peerFinder.StopService();
-    }
-
-    public override void Exit()
-    {
-        _peerFinder.Cleanup();
-    }
-
-    public override void OnBackPressed()
-    {
-        _controller.DisplayStatus("Disconnecting from search");
-        _hostPeer.Close();
-        _peerFinder.StopService();
-        _controller.DetachMultiplayerSignals();
-    }
-
-    public void OnRegisteredService()
-    {
-        _controller.DisplayStatus("You are discoverable on your network.");
-    }
-
-    public void OnRegisterServiceFailed()
-    {
-        _controller.DisplayStatus("Unable to broadcast your present on your network.");
-        _controller.DisplayUpdate("Go back to try again or wait for you to connect to a peer.");
-    }
-
-    public void OnUnregisteredService()
-    {
-        if (_nextState == null)
-            _controller.BackToMenu();
-        else
-            _controller.TransitionTo(_nextState);
-    }
-
-    public override void OnPeerPlayPressed()
-    {
-        _controller.SetPeerReady();
-    }
-
-    public void OnServiceFound(string ip, int port)
-    {
-        _clientPeer = new ENetMultiplayerPeer();
-        var err = _clientPeer.CreateClient(ip, port);
-        if (err != Error.Ok)
-        {
-            GD.Print($"LocalMatchmakingController::DiscoveringState::OnServiceFound() -- error creating _clientPeer: {
-                err
-            }");
-        }
-        _controller.AssignMultiplayerPeer(_clientPeer);
-        _nextState = new ConfirmingState(_controller);
-        _peerFinder.StopService();
-        _hostPeer.Close();
-    }
-}
-
-internal class ConfirmingState : ILocalMatchmakingState
-{
-    private LocalMatchmakingController _controller;
-    private bool _ready;
-    private bool _peerReady;
-    public ConfirmingState(LocalMatchmakingController controller)
-    {
-        _controller = controller;
-    }
-
-    public override void Enter()
-    {
-        _controller.DisplayStatus("Testing the connection");
-        var isConnected = _controller.TestConnection();
-        if (!isConnected)
-        {
-            GD.Print("LocalMatchmakingController::ConfirmingState::Enter: Testing connection failed");
-            _controller.TransitionTo(new DiscoveringState(_controller));
-        }
-        else
-        {
-            _controller.DisplayPlayStatus();
-            if (_controller.PeerReady)
-            {
-                _controller.DisplayStatus("Peer hit Play! Press Play to continue!");
-            }
+            var removeIdx = _peerList.FindIndex(info => info.PeerName == serviceInfo.PeerName);
+            _peerList.RemoveAt(removeIdx);
+            _matchmakingNode.DiscoveredPeers.RemoveItem(removeIdx);
+            _peerList.Add(serviceInfo);
+            _matchmakingNode.DiscoveredPeers.AddItem(serviceInfo.PeerName);
         }
     }
 
-    public override void Exit()
+    public void SelectItem(long index)
     {
-        _controller.HidePlayButton();
+        _selectedPeerIndex = (int)index;
+        TransitionTo(new SelectingState(this));
     }
 
-    public override void OnBackPressed()
+    public void ShowActionButton()
     {
-        _controller.DisconnectMultiplayerPeer();
-        _controller.BackToMenu(); 
+        _matchmakingNode.ActionButton.Show();
     }
 
-    public override void OnPlayPressed()
+    public void OnActionPressed()
     {
-        if (_controller.PeerReady)
-        {
-            _controller.ExitMatchmaking();
-            return;
-        }
-        _controller.DisplayStatus("Waiting for peer to hit Play!");
-        _ready = true;
+        _currentState.OnActionPressed();
     }
 
-    public override void OnPeerPlayPressed()
+    public ServiceInfo GetSelectedPeer()
     {
-        // if already press play go to next screen
-        if (_ready)
-        {
-            _controller.ExitMatchmaking();
-            return;
-        }
-        
-        _controller.DisplayStatus("Your peer is ready! Hit Play!");
-
-        _controller.PeerReady = true;
-    }
-}
-
-public abstract class ILocalMatchmakingState
-{
-    public abstract void Enter();
-    public abstract void Exit();
-    public abstract void OnBackPressed();
-
-    public virtual void OnPlayPressed()
-    {
-        throw new NotImplementedException($"{GetType().Name} OnPlayPressed() is not implemented.");
+        return _peerList[_selectedPeerIndex];
     }
 
-    public virtual void OnPeerPlayPressed()
+    public void ShowAndUpdatePeerLabel(string peerName)
     {
-        throw new NotImplementedException($"{GetType().Name} OnPeerPlayPressed() is not implemented.");
+        _matchmakingNode.DiscoveredPeers.Hide();
+        _matchmakingNode.PeerLabel.Show();
+        _matchmakingNode.PeerLabel.Text = $"{peerName} would like to play";
+    }
+
+    public void HidePeerLabel()
+    {
+        _matchmakingNode.PeerLabel.Hide();
+    }
+
+    public void ShowAction(string text)
+    {
+        _matchmakingNode.ActionButton.Text = text;
+        _matchmakingNode.ActionButton.Show();
+    }
+
+    public void Shutdown()
+    {
+        PeerFinder.Shutdown();
+        if (!_matchmakingNode.GetNodesToShare().Exists(n => n.GetType().Name == nameof(ENetP2PPeerService)))
+            ConnectionManager.Shutdown();
+        ConnectionManager.DisconnectSignals();
     }
 }

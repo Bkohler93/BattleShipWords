@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
+using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Nodes.Game.multiplayer;
 using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Services.WordList;
@@ -36,7 +37,15 @@ public partial class Gameboard : Control
     public event Action<string> GuessMade; 
     public event Action<(int row, int col)> TileUncovered;
     public event Action BackspacePressed;
-    public event Action<string> KeyPressed;
+    // public event Action<KeyData> KeyPressed;
+    // public event Action<UIUpdate> UIUpdated;
+    public event Action<UIEvent> LocalUpdateMade;
+    
+    
+    // _playerOneGameboard.GuessMade += _multiplayerGameManager.GuessMadeEventHandler;
+    // _playerOneGameboard.TileUncovered += _multiplayerGameManager.TileUncoveredEventHandler;
+    // _playerOneGameboard.BackspacePressed += _multiplayerGameManager.LocalBackspacePressedEventHandler;
+    // _playerOneGameboard.KeyPressed += _multiplayerGameManager.LocalKeyPressedEventHandler;
 
     public void Init(MultiplayerGameManager gameManager)
     {
@@ -47,7 +56,6 @@ public partial class Gameboard : Control
     public override void _ExitTree()
     {
         BackspacePressed = null;
-        KeyPressed = null;
         TileUncovered = null;
         GuessMade = null;
     }
@@ -64,9 +72,9 @@ public partial class Gameboard : Control
         CallDeferred(nameof(ApplyInitialRotation));
         if (!IsControlledLocally)
             CallDeferred(nameof(_addInputBlockingPanel));
-
-        KeyPressed += KeyPressedEventHandler;
-        BackspacePressed += BackspacePressedEventHandler;
+        
+        // KeyPressed += KeyPressedHandler;
+        // BackspacePressed += BackspacePressedEventHandler;
     }
 
     private void OnGuessBtnPressed()
@@ -89,7 +97,15 @@ public partial class Gameboard : Control
         }
 
         // _updateKeyboardAfterLocalGuess(word);
-        GuessMade?.Invoke(word);
+        // GuessMade?.Invoke(word);
+        LocalUpdateMade?.Invoke(new UIEvent
+        {
+            Type = EventType.GuessedWord,
+            Data = new  GuessedWordData
+            {
+                Word = word, 
+            }
+        });
         GD.Print($"Gameboard::OnGuessBtnPressed: {word} -- invoked GuessMade");
     }
 
@@ -103,18 +119,7 @@ public partial class Gameboard : Control
         }
     }
 
-    public void BackspacePressedEventHandler()
-    {
-        if (_wordGuessLabel.Text.Length > 0)
-            _wordGuessLabel.Text = _wordGuessLabel.Text[..^1];
-    }
-
-    public void KeyPressedEventHandler(string letter)
-    {
-        if (_wordGuessLabel.Text.Length == 5)
-            return;
-        _wordGuessLabel.Text += letter;
-    }
+    
 
     private void _addInputBlockingPanel()
     {
@@ -194,7 +199,14 @@ public partial class Gameboard : Control
        {
            var key = keyboardKeyScene.Instantiate() as KeyboardKey;
            key.Initialize(letter);
-           key.ButtonPressed += (l) => KeyPressed?.Invoke(l);
+           key.ButtonPressed += (l) => LocalUpdateMade?.Invoke(new UIEvent
+           {
+               Type = EventType.KeyPressed,
+               Data = new EventKeyPressedData
+               {
+                   Key = l
+               }
+           });
            _topKeyboardRow.AddChild(key);
            _keyboard[letter] = key;
        }
@@ -203,7 +215,14 @@ public partial class Gameboard : Control
        {
            var key = keyboardKeyScene.Instantiate() as KeyboardKey;
            key.Initialize(letter);
-           key.ButtonPressed += (l) => KeyPressed?.Invoke(l);
+           key.ButtonPressed += (l) => LocalUpdateMade?.Invoke(new UIEvent
+           {
+               Type = EventType.KeyPressed,
+               Data = new EventKeyPressedData
+               {
+                   Key = l
+               }
+           });
            _middleKeyboardRow.AddChild(key);
            _keyboard[letter] = key;
        }
@@ -212,12 +231,27 @@ public partial class Gameboard : Control
        {
            var key = keyboardKeyScene.Instantiate() as KeyboardKey;
            key.Initialize(letter);
-           key.ButtonPressed += (l) => KeyPressed?.Invoke(l);
+           key.ButtonPressed += (l) => LocalUpdateMade?.Invoke(new UIEvent
+           {
+               Type = EventType.KeyPressed,
+               Data = new EventKeyPressedData
+               {
+                   Key = l
+               }
+           });
            _bottomKeyboardRow.AddChild(key);
            _keyboard[letter] = key;
        }
        var backspaceBtn = new BackspaceButton();
-       backspaceBtn.ButtonPressed += () => BackspacePressed?.Invoke();
+       // backspaceBtn.ButtonPressed += () => KeyPressed?.Invoke(new KeyData("backspace"));
+       backspaceBtn.ButtonPressed += () => LocalUpdateMade?.Invoke(new UIEvent
+       {
+           Type = EventType.KeyPressed,
+           Data = new EventKeyPressedData
+           {
+               Key = "backspace" 
+           }
+       });
        _bottomKeyboardRow.AddChild(backspaceBtn);
     }
 
@@ -237,14 +271,23 @@ public partial class Gameboard : Control
                 var tile = tilePackedScene.Instantiate() as Tile;
                 tile.CustomMinimumSize = new Vector2(tileSize, tileSize);
                 tile.Init(i,j, tileSize);
-                tile.ButtonPressed += (row, col) => TileUncovered?.Invoke((row, col));
+                // tile.ButtonPressed += (row, col) => TileUncovered?.Invoke((row, col));
+                tile.ButtonPressed += (row, col) => LocalUpdateMade?.Invoke(new UIEvent
+                {
+                    Type = EventType.UncoveredTile,
+                    Data = new UncoveredTileData
+                    {
+                        Row = row,
+                        Col = col
+                    }
+                });
                 _gridContainer.AddChild(tile);
                 _gameBoard[i].Add(tile);
             }
         }
     }
 
-    public void GuessResultReceivedEventHandler(WordGuessedResponseData result)
+    public void ProcessGuessResult(WordGuessedResponseData result)
     {
         _guessedWords.Add(_wordGuessLabel.Text);
         _wordGuessLabel.Text = "";
@@ -285,7 +328,7 @@ public partial class Gameboard : Control
         }
     }
 
-    public void TileUncoverResultReceivedEventHandler(UncoveredTileResponse result)
+    public void ProcessUncoverTile(UncoveredTileResponse result)
     {
         foreach (var (letter, keyboardStatus) in result.KeyboardStatus)
         {
@@ -322,4 +365,95 @@ public partial class Gameboard : Control
             }    
         }
     }
+
+    public void ProcessKeyPress(string key)
+    {
+        if (key == "backspace")
+        {
+            if (_wordGuessLabel.Text.Length > 0)
+                _wordGuessLabel.Text = _wordGuessLabel.Text[..^1];    
+        } else if (key.Length > 1)
+        {
+            GD.PrintErr($"Attempting to process invalid key: {key}");
+        }
+        else //must be keyboard key
+        {
+            if (_wordGuessLabel.Text.Length == 5)
+                return;
+            _wordGuessLabel.Text += key;
+        }
+    }
+    
+    public void UIUpdatedHandler(UIUpdate @event)
+    {
+        switch (@event.Type)
+        {
+            case UIUpdateType.UncoveredTile:
+            {
+                if (@event.Data is UncoveredTileResponse result)
+                    ProcessUncoverTile(result);
+                else
+                    throw new Exception("Invalid UncoverTile UIEvent Data attempted to be processed");
+                break;
+            }
+            case UIUpdateType.GuessedWord:
+            {
+                if (@event.Data is WordGuessedResponseData result)
+                    ProcessGuessResult(result); 
+                else
+                    throw new Exception("Invalid GuessedWord UIEvent Data attempted to be processed");
+                break;
+            }
+            case UIUpdateType.KeyPressed:
+            {
+                if (@event.Data  is KeyData result)
+                    ProcessKeyPress(result.Key);
+                else
+                    throw new Exception("Invalid KeyPressed UIEvent Data attempted to be processed");
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 }
+
+public class GuessedWordEventData : UIEventData
+{
+    public string Word;
+
+    public GuessedWordEventData(string word)
+    {
+        Word = word;
+    }
+}
+
+
+public abstract class UIEventData{}
+
+public record class UIEvent
+{
+    public required EventType Type;
+    public required IEventData Data;
+}
+
+public enum UIUpdateType
+{
+    UncoveredTile,
+    GuessedWord,
+    KeyPressed
+}
+
+public abstract class UIUpdateData{}
+
+public record class UIUpdate
+{
+       public required UIUpdateType Type;
+       public required UIUpdateData Data;
+}
+
+public class KeyData(string key) : UIUpdateData
+{
+    public string Key = key;
+}
+

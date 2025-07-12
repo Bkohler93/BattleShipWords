@@ -1,25 +1,27 @@
 using Godot;
 using System;
-using BattleshipWithWords.Controllers.Multiplayer;
-using BattleshipWithWords.Networkutils;
-using BattleshipWithWords.Services;
-using Godot.Collections;
+using System.Collections.Generic;
+using androidplugintest.ConnectionManager;
+using BattleshipWithWords.Controllers;
+using BattleshipWithWords.Controllers.Multiplayer.LocalMatchmakingController;
 
 namespace BattleshipWithWords.Nodes.Menus;
 
-public partial class LocalMatchmaking : Control
+public partial class LocalMatchmaking : Control, ISceneNode
 {
     [Export]
     public Button BackButton;
     
     [Export]
-    public Button PlayButton;
+    public Button ActionButton;
 
     [Export]    
     public Label StatusLabel;
 
-    [Export] 
-    public Label UpdateLabel;
+    [Export]
+    public ItemList DiscoveredPeers;
+
+    [Export] public Label PeerLabel;
 
     public Action BackToMainMenu;
     public Action StartGame;
@@ -30,29 +32,37 @@ public partial class LocalMatchmaking : Control
         _controller = new LocalMatchmakingController(this);
     }
 
+    public List<Node> GetNodesToShare() => _nodesToKeepAlive;
+    public void AddNodeToShare(Node node) => _nodesToKeepAlive.Add(node);
+
+    public P2PConnectionManager ConnectionManager => _controller.ConnectionManager;
+    private ENetP2PPeerService _peerService;
+    private readonly List<Node> _nodesToKeepAlive = [];
+
     public override void _Ready()
     {
         BackButton.Pressed += _controller.OnBackPressed;
-        PlayButton.Pressed += _onPlayButtonPressed;
-        PlayButton.Hide();
-        _controller.Init();
+        DiscoveredPeers.ItemSelected += index =>
+        {
+            _controller.SelectItem(index);
+        };
+        ActionButton.Pressed += _controller.OnActionPressed;
+        _peerService = new ENetP2PPeerService();
+        AddChild(_peerService, forceReadableName:true);
+        _controller.Init(_peerService);
+    }
+
+    public void Shutdown()
+    {
+        _controller.Shutdown();
     }
 
     public override void _ExitTree()
     {
-        _controller.DetachMultiplayerSignals();
-    }
-    
-    private void _onPlayButtonPressed()
-    {
-        PlayButton.Hide();
-        RpcId(_controller.MultiplayerPeerId, MethodName.Rpc_SendPlayReady);
-        _controller.OnPlayPressed();
     }
 
-    [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    private void Rpc_SendPlayReady()
+    public void PersistSharingNodes()
     {
-        _controller.OnPeerPressedPlay();
+        _nodesToKeepAlive.Add(_peerService);
     }
 }

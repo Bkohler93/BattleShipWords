@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -38,5 +39,20 @@ public class MultiplayerMenuScene: IScene
         };
         _multiplayerMenu = multiplayerMenu;
         return multiplayerMenu;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _multiplayerMenu.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _multiplayerMenu.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _multiplayerMenu;
     }
 }

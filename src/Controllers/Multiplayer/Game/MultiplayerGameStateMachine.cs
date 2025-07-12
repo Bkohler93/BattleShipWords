@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using androidplugintest.ConnectionManager;
+using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Services.GameManager;
 using Godot;
 using Godot.Collections;
@@ -8,23 +11,28 @@ namespace BattleshipWithWords.Controllers.Multiplayer.Game;
 
 public class MultiplayerGameManagerStateMachine
 {
-    private IMultiplayerGameManagerState _currentState;
+    private MultiplayerGameManagerState _currentState;
     private MultiplayerGameManager _gameManager;
     
-    public IMultiplayerGameManagerState CurrentState => _currentState;
+    public MultiplayerGameManagerState CurrentState => _currentState;
 
-    public MultiplayerGameManagerStateMachine(IMultiplayerGameManagerState currentState, MultiplayerGameManager gameManager)
+    public MultiplayerGameManagerStateMachine(MultiplayerGameManager gameManager)
     {
-        _currentState = currentState;
         _gameManager = gameManager;
+        TransitionTo(new SettingUp(_gameManager, this));
     }
 
-    public bool TryProcessRemote(MultiplayerMessage msg)
+    public void ProcessLocalUpdate(UIEvent @event)
     {
-        return _currentState.TryProcessRemote(msg);
+        _currentState.ProcessLocalUpdate(@event);
     }
 
-    public void TransitionTo(IMultiplayerGameManagerState nextState)
+    // public bool TryProcessRemote(MultiplayerMessage msg)
+    // {
+    //     return _currentState.TryProcessRemote(msg);
+    // }
+
+    public void TransitionTo(MultiplayerGameManagerState nextState)
     {
         _currentState?.Exit();
         _currentState = nextState;
@@ -32,61 +40,113 @@ public class MultiplayerGameManagerStateMachine
     }
 }
 
-public class SettingUp : IMultiplayerGameManagerState
-{
-    private MultiplayerGameManager _gameManager;
-
-    public SettingUp(MultiplayerGameManager gameManager)
-    {
-        _gameManager = gameManager;
-    }
-
-    public void Exit()
-    {
-    }
-
-    public void Enter()
-    {
-    }
-
-    public bool TryProcessRemote(MultiplayerMessage msg)
-    {
-        return false;
-    }
-}
-
-public class SetupComplete : IMultiplayerGameManagerState
+public class SettingUp : MultiplayerGameManagerState
 {
     private MultiplayerGameManager _gameManager;
     private MultiplayerGameManagerStateMachine _stateMachine;
-    public SetupComplete(MultiplayerGameManager multiplayerGameManager, MultiplayerGameManagerStateMachine stateMachine)
+    private bool _finishedSettingUp;
+    private bool _peerFinishedSettingUp;
+
+    public SettingUp(MultiplayerGameManager gameManager, MultiplayerGameManagerStateMachine stateMachine)
     {
-        _gameManager = multiplayerGameManager;
+        _gameManager = gameManager;
+        _gameManager.SetConnectionListener(this);
         _stateMachine = stateMachine;
     }
 
-    public void Exit()
+    public override void Exit()
     {
         _gameManager.StartGame();
     }
 
-    public void Enter()
+    public override void Enter()
     {
     }
 
-    public bool TryProcessRemote(MultiplayerMessage msg)
+    public override void Connected()
     {
-        if (msg.Type != MultiplayerMessageType.Setup) return false;
-        
-        if (_gameManager.LocalId == 1)
-            _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
+        throw new System.NotImplementedException();
+    }
+
+    public override void UnableToConnect()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void Reconnected()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void ReconnectFailed()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void Disconnected()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void Receive(Dictionary message)
+    {
+        var msg = MultiplayerMessage.FromDictionary(message);
+        if (msg.Type != MultiplayerMessageType.Setup)
+        {
+            GD.Print($"MultiplayerGameManager::SettingUp: did not process msg of type {msg.Type}");
+            return;
+        }
+
+        if (_finishedSettingUp)
+        {
+            _completeSetup();
+            _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.SetupComplete);   
+        } else
+            _peerFinishedSettingUp = true;
+    }
+
+    public override void ProcessLocalUpdate(UIEvent @event)
+    {
+        if (@event.Type == EventType.SetupCompleted)
+        {
+            if (@event.Data is not SetupCompletedEventData data)
+                throw new Exception("MultiplayerGameManager::SettingUp::ProcessLocalUpdate: data is not SetupCompleteData");
+            _gameManager.PlayerTwoGameStateManager = RemoteGameStateManager.FromSetup(data.SelectedWords, data.SelectedGridCoordinates);
+            _gameManager.SendSetupComplete();
+
+            if (_peerFinishedSettingUp)
+            {
+                _completeSetup();
+                _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.SetupComplete);   
+            }
+            else
+            {
+                _finishedSettingUp = true;
+                _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.WaitingForOtherPlayer);   
+            }
+        }
         else
+        {
+            throw new Exception("MultiplayerGameManager::SettingUp::ProcessLocalUpdate: received UIEvent of incorrect type");        
+        }
+    }
+
+    private void _completeSetup()
+    {
+        if (_gameManager.IsHost())
+        {
+            GD.Print("Completed setup, transitioning into PlayingState");
+            _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
+        }
+        else
+        {
+            GD.Print("Completed setup, transitioning into OpponentPlayingState");
             _stateMachine.TransitionTo(new OpponentPlayingState(_gameManager, _stateMachine));
-        return true;
+        }
     }
 }
 
-public class OpponentPlayingState : IMultiplayerGameManagerState
+public class OpponentPlayingState : MultiplayerGameManagerState
 {
     private MultiplayerGameManager _gameManager;
     private MultiplayerGameManagerStateMachine _stateMachine;
@@ -94,58 +154,176 @@ public class OpponentPlayingState : IMultiplayerGameManagerState
     public OpponentPlayingState(MultiplayerGameManager gameManager, MultiplayerGameManagerStateMachine stateMachine)
     {
         _gameManager = gameManager;
+        _gameManager.SetConnectionListener(this);
         _stateMachine = stateMachine;
     }
 
-    public void Exit()
+    public override void Exit()
     {
     }
 
-    public void Enter()
+    public override void Enter()
     {
     }
 
-    public bool TryProcessRemote(MultiplayerMessage msg)
+    public override void Reconnected()
     {
+        throw new NotImplementedException();
+    }
+
+    public override void ReconnectFailed()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Disconnected()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Receive(Dictionary message)
+    {
+        var msg = MultiplayerMessage.FromDictionary(message);
         if (msg.Type == MultiplayerMessageType.Playing)
         {
             var playingData = msg.Data as PlayingData;
-            switch (playingData.Type)
+            switch (playingData!.Type)
             {
                 case PlayingDataType.Event:
                     var eventData = playingData.Data as PlayingEventData;
                     _processEvent(eventData);
                     break;
                 case PlayingDataType.Response:
-                    GD.Print($"OpponentPlayingState::ProcessRemote: Should not have gotten a response while opponent is playing");
+                    GD.Print("OpponentPlayingState::ProcessRemote: Should not have gotten a response while opponent is playing");
                     break;
             }
-            return true;
         }
-
-        return false;
+        else
+        {
+            GD.Print($"MultiplayerGameManager::OpponentPlayingState: did not process msg of type {msg.Type}");
+        }
     }
-    
+
+    public override void ProcessLocalUpdate(UIEvent @event)
+    {
+        switch (@event.Type)
+        {
+            case EventType.SetupCompleted:
+                GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - ProcessLocalUpdate received SetupCompleted event.");
+                break;
+            case EventType.GuessedWord:
+                break;
+            case EventType.UncoveredTile:
+                break;
+            case EventType.KeyPressed:
+                var data = (@event.Data as EventKeyPressedData);
+                GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
+                _gameManager.UpdateLocalUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData(data.Key), 
+                });
+                _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
     private void _processEvent(PlayingEventData eventData)
     {
+        TurnResult? result = null;
         switch (eventData.Type)
         {
             case EventType.BackspacePressed:
-                _gameManager.OpponentPressBackspace();
+            {
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData("backspace") 
+                });
                 break;
+            }
             case EventType.KeyPressed:
-                var keyPressedData = eventData.Data as EventKeyPressedData;
-                _gameManager.OpponentPressKey(keyPressedData!.Key);
+            {
+                if (eventData.Data is not EventKeyPressedData keyPressedData)
+                    throw new Exception("OpponentPlayingState: invalid KeyPressed Data received in _processEvent");
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData(keyPressedData.Key) 
+                });
                 break;
+            }
             case EventType.GuessedWord:
-                var guessedWordData = eventData.Data as GuessedWordData;
-                _gameManager.ProcessOpponentWordGuess(guessedWordData!.Word);
-                break;
+            {
+                if (eventData.Data is not GuessedWordData guessedWordData)
+                    throw new Exception("OpponentPlayingState: invalid WordGuess Data received in _processEvent");
+                var res = _processWordGuess(guessedWordData.Word);
+                _gameManager.SendPlayingResponse(ResponseType.WordGuessed, res);
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.GuessedWord,
+                    Data = res, 
+                });
+                result = res.Result;
+                if (res.Result == TurnResult.TurnOver)
+                    _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
+                else if (res.Result == TurnResult.Win)
+                    _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, false));
+                break; 
+            }
             case EventType.UncoveredTile:
-                var coords = eventData.Data as UncoveredTileData;
-                _gameManager.ProcessOpponentUncoverTile(coords!.Row, coords.Col);
+            {
+                if (eventData.Data is not UncoveredTileData uncoveredTileData)
+                    throw new Exception("OpponentPlayingState: invalid UncoverTile Data received in _processEvent");
+                var res = _processUncoverTile(uncoveredTileData.Row, uncoveredTileData.Col);
+                _gameManager.SendPlayingResponse(ResponseType.TileUncovered, res);
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.UncoveredTile,
+                    Data = res 
+                });
+                result = res.Result;
                 break;
+            }
         }
+
+        if (result != null)
+        {
+            switch (result)
+            {
+                case TurnResult.GoAgain:
+                    break;
+                case TurnResult.TurnOver:
+                    _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
+                    break;
+                case TurnResult.Win:
+                    _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, false));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    private UncoveredTileResponse _processUncoverTile(int row, int col)
+    {
+        var res = _gameManager.PlayerTwoGameStateManager.ProcessTileUncovered(row, col);
+        return res;
+    }
+
+    private WordGuessedResponseData _processWordGuess(string word)
+    {
+        var res = _gameManager.PlayerTwoGameStateManager.ProcessWordGuess(word);
+
+        var data = new WordGuessedResponseData()
+        {
+            Result = res.Result,
+            ResponseLetters = res.ResponseLetters,
+            WordLetterStatus = res.WordLetterStatus,
+        };
+        return data;
     }
 }
 
@@ -156,7 +334,7 @@ public enum TurnResult
     Win
 }
 
-public class PlayingState : IMultiplayerGameManagerState
+public class PlayingState : MultiplayerGameManagerState
 {
     private MultiplayerGameManager _gameManager;
     private MultiplayerGameManagerStateMachine _stateMachine;
@@ -164,22 +342,31 @@ public class PlayingState : IMultiplayerGameManagerState
     {
         _stateMachine = stateMachine;
         _gameManager = gameManager;
+        _gameManager.SetConnectionListener(this);
     }
 
-    public void Exit()
+    public override void Exit()
     {
     }
 
-    public void Enter()
+    public override void Enter()
     {
     }
 
-    public bool TryProcessRemote(MultiplayerMessage msg)
+    
+
+    public override void Reconnected()
     {
+        throw new NotImplementedException();
+    }
+
+    public override void Receive(Dictionary message)
+    {
+        var msg = MultiplayerMessage.FromDictionary(message); 
         if (msg.Type == MultiplayerMessageType.Playing)
         {
             var playingData = msg.Data as PlayingData;
-            switch (playingData.Type)
+            switch (playingData!.Type)
             {
                 case PlayingDataType.Event:
                     var eventData = playingData.Data as PlayingEventData;
@@ -187,63 +374,145 @@ public class PlayingState : IMultiplayerGameManagerState
                     break;
                 case PlayingDataType.Response:
                     var respData = playingData.Data as PlayingResponseData;
-                    _processResponse(respData);
+                    var result = _processResponse(respData);
+                    if (result == null) break;
+                    switch (result)
+                    {
+                        case TurnResult.GoAgain:
+                            break;
+                        case TurnResult.TurnOver:
+                            _stateMachine.TransitionTo(new OpponentPlayingState(_gameManager, _stateMachine));
+                            break;
+                        case TurnResult.Win:
+                            _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, true));
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                     break;
             }
-            return true;
         }
+        else
+        {
+            GD.Print($"MultiplayerGameManager::PlayingState: did not process msg of type {msg.Type}");
+        } 
 
-        GD.Print($"MultiplayerGameManager::PlayingState: did not process msg of type {msg.Type}");
-        return false;
     }
-    
+
+    public override void ProcessLocalUpdate(UIEvent @event)
+    {
+        switch (@event.Type)
+        {
+            case EventType.SetupCompleted:
+                GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - ProcessLocalUpdate received SetupCompleted event.");
+                break;
+            case EventType.GuessedWord:
+                _gameManager.SendPlayingEvent(@event.Type, @event.Data as GuessedWordData);
+                break;
+            case EventType.UncoveredTile:
+                _gameManager.SendPlayingEvent(@event.Type, @event.Data as UncoveredTileData);
+                break;
+            case EventType.KeyPressed:
+                var data = (@event.Data as EventKeyPressedData);
+                GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
+                _gameManager.UpdateLocalUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData(data.Key), 
+                });
+                _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public override void ReconnectFailed()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Disconnected()
+    {
+        throw new NotImplementedException();
+    }
+
     private void _processEvent(PlayingEventData eventData)
     {
         switch (eventData.Type)
         {
             case EventType.BackspacePressed:
-                _gameManager.OpponentPressBackspace();
+            {
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData("backspace") 
+                });
                 break;
+            }
             case EventType.KeyPressed:
-                var keyPressedData = eventData.Data as EventKeyPressedData;
-                _gameManager.OpponentPressKey(keyPressedData!.Key);
+            {
+                if (eventData.Data is not EventKeyPressedData keyPressedData)
+                    throw new Exception("OpponentPlayingState: invalid KeyPressed Data received in _processEvent");
+                _gameManager.UpdateOpponentUI(new UIUpdate
+                {
+                    Type = UIUpdateType.KeyPressed,
+                    Data = new KeyData(keyPressedData.Key) 
+                });
                 break;
+            }
             case EventType.GuessedWord:
                 GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - Event GuessedWord received during PlayingState"); 
                 break;
             case EventType.UncoveredTile:
                 GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - Event UncoveredTile received during PLayingState");
                 break;
-            //TODO  UncoveredTile
         }
     }
 
-    private void _processResponse(PlayingResponseData respData)
+    private TurnResult? _processResponse(PlayingResponseData respData)
     {
-        switch (respData.Type)
+        TurnResult result;
+        if (respData.Type == ResponseType.WordGuessed)
         {
-            case ResponseType.WordGuessed:
-                var wordGuessData = respData.Data as WordGuessedResponseData;
-                _gameManager.UpdateLocalGameFromWordGuess(wordGuessData);
-                break;
-            case ResponseType.TileUncovered:
-                var uncoverTileData = respData.Data as UncoveredTileResponse;
-                _gameManager.UpdateLocalFromUncoverTile(uncoverTileData);
-                break;
+            var wordGuessData = respData.Data as WordGuessedResponseData;
+            result = wordGuessData.Result;
+            _gameManager.UpdateLocalUI(new UIUpdate
+            {
+                Type = UIUpdateType.GuessedWord,
+                Data = wordGuessData
+            });
+            // _gameManager.UpdateLocalGameFromWordGuess(wordGuessData);
         }
-    }
+        else if (respData.Type == ResponseType.TileUncovered)
+        {
+            var uncoverTileData = respData.Data as UncoveredTileResponse;
+            result = uncoverTileData.Result;
+            _gameManager.UpdateLocalUI(new UIUpdate
+            {
+                Type = UIUpdateType.UncoveredTile,
+                Data = uncoverTileData,
+            });
+            // _gameManager.UpdateLocalFromUncoverTile(uncoverTileData);
+        }
+        else
+        {
+            GD.PrintErr("MultiplayerGameStateMachine::PlayingState:_processResponse processed invalid TurnResult");
+            result = TurnResult.TurnOver;
+        }
 
-    
+        return result;
+    }
 }
 
-public class UncoveredTileResponse : IResponseData
+public class UncoveredTileResponse : UIUpdateData, IResponseData 
 {
     public List<string> WordLetterStatus;
     public List<(int row, int col, string letter, GameTileStatus status)> GameboardStatus;
     public System.Collections.Generic.Dictionary<char, KeyboardLetterStatus> KeyboardStatus;
     public TurnResult Result;
     
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         Array<string> wordLetterStatus = [];
         foreach (var word in WordLetterStatus)
@@ -272,7 +541,7 @@ public class UncoveredTileResponse : IResponseData
         };
     }
 
-    public static UncoveredTileResponse Deserialize(Dictionary dictionary)
+    public static UncoveredTileResponse FromDictionary(Dictionary dictionary)
     {
         var wordLetterStatus = ((Array<string>)dictionary["WordLetterStatus"]).ToList();
         var keyboardStatus = new System.Collections.Generic.Dictionary<char, KeyboardLetterStatus>();
@@ -282,7 +551,7 @@ public class UncoveredTileResponse : IResponseData
         }
 
         var gameboardStatus = new List<(int row, int col, string letter, GameTileStatus status)>();
-        foreach (var status in (Godot.Collections.Array<string>)dictionary["GameboardStatus"])
+        foreach (var status in (Array<string>)dictionary["GameboardStatus"])
         {
             var parts = status.Split(',');
             var row = int.Parse(parts[0]);
@@ -302,7 +571,7 @@ public class UncoveredTileResponse : IResponseData
     }
 }
 
-public class GameOverState : IMultiplayerGameManagerState
+public class GameOverState : MultiplayerGameManagerState
 {
     private MultiplayerGameManagerStateMachine _stateMachine;
     private MultiplayerGameManager _gameManager;
@@ -311,14 +580,15 @@ public class GameOverState : IMultiplayerGameManagerState
     {
         _stateMachine = stateMachine;
         _gameManager = multiplayerGameManager;
+        _gameManager.SetConnectionListener(this);
         _didWin = didWin;
     }
 
-    public void Exit()
+    public override void Exit()
     {
     }
 
-    public void Enter()
+    public override void Enter()
     {
         if (_didWin)
         {
@@ -330,19 +600,52 @@ public class GameOverState : IMultiplayerGameManagerState
         }
     }
 
-    public bool TryProcessRemote(MultiplayerMessage msg)
+    public override void Reconnected()
     {
-        return true;
+        throw new NotImplementedException();
+    }
+
+    public override void ReconnectFailed()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Disconnected()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void ProcessLocalUpdate(UIEvent @event)
+    {
+        throw new NotImplementedException();
     }
 }
 
 
-
-
-
-public interface IMultiplayerGameManagerState
+public abstract class MultiplayerGameManagerState:IP2PConnectionListener
 {
-    public void Exit();
-    public void Enter();
-    bool TryProcessRemote(MultiplayerMessage msg);
+    public abstract void Exit();
+    public abstract void Enter();
+    public virtual void Connected()
+    {
+        throw new NotImplementedException($"{GetType().Name} does not implement Connected");
+    }
+
+    public virtual void UnableToConnect()
+    {
+        throw new NotImplementedException($"{GetType().Name} does not implement UnableToConnect");
+    }
+
+    public abstract void Reconnected();
+
+    public abstract void ReconnectFailed();
+
+    public abstract void Disconnected();
+
+    public virtual void Receive(Dictionary message)
+    {
+        throw new NotImplementedException($"{GetType().Name} does not implement Receive");
+    }
+
+    public abstract void ProcessLocalUpdate(UIEvent @event);
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using Godot;
@@ -11,7 +12,9 @@ public class MultiplayerSetupScene : IScene
     private SceneManager _sceneManager;
     private MultiplayerGameManager _gameManager;
     private MultiplayerSetup _multiplayerSetupNode;
-    private Action _setupCompleteEventHandler;
+    private bool _isWaiting; 
+    
+    private Action _bothSetupsCompletedHandler;
 
     public MultiplayerSetupScene(MultiplayerGameManager gameManager, SceneManager sceneManager, OverlayManager overlayManager)
     {
@@ -46,20 +49,53 @@ public class MultiplayerSetupScene : IScene
     {
         _multiplayerSetupNode = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/multiplayer_setup.tscn").Instantiate() as MultiplayerSetup;
         _multiplayerSetupNode.Init(_gameManager);
-        _setupCompleteEventHandler = () =>
+
+        _gameManager.SetupUpdated = (update) =>
         {
-            _gameManager.SetupComplete -= _setupCompleteEventHandler;
-            _overlayManager.Remove("waiting");
-            _sceneManager.TransitionTo(new MultiplayerGameScene(_sceneManager, _overlayManager, _gameManager),
-                TransitionDirection.Forward);
-            GD.Print($"MultiplayerSetupScene: transitioned to MultiplayerGameScene"); 
+            switch (update)
+            {
+                case SetupSceneUpdate.WaitingForOtherPlayer:
+                    _isWaiting = true;
+                    _overlayManager.Add("waiting", new WaitingOverlay(), 2);
+                    break;
+                case SetupSceneUpdate.SetupComplete:
+                {
+                    if (_isWaiting)
+                        _overlayManager.Remove("waiting");
+                    _sceneManager.TransitionTo(new MultiplayerGameScene(_sceneManager, _overlayManager, _gameManager),
+                        TransitionDirection.Forward);
+                    break;
+                }
+            }
         };
-        _gameManager.SetupComplete += _setupCompleteEventHandler;
-        _multiplayerSetupNode.SetupCompleteCallback += (selectedWords, boardSelection) =>
-        {
-            _gameManager.CompleteLocalSetup(selectedWords, boardSelection);
-            _overlayManager.Add("waiting", new WaitingOverlay(), 2);
-        };
+        
+        // _bothSetupsCompletedHandler = () =>
+        // {
+        //     _gameManager.BothSetupsCompleted -= _bothSetupsCompletedHandler;
+        //     _overlayManager.Remove("waiting");
+        //     _sceneManager.TransitionTo(new MultiplayerGameScene(_sceneManager, _overlayManager, _gameManager),
+        //         TransitionDirection.Forward);
+        //     GD.Print($"MultiplayerSetupScene: transitioned to MultiplayerGameScene"); 
+        // };
+        // _gameManager.BothSetupsCompleted += _bothSetupsCompletedHandler;
+        // _multiplayerSetupNode.LocalSetupComplete += () =>
+        // {
+        // };
+        return _multiplayerSetupNode;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _multiplayerSetupNode.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _multiplayerSetupNode.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
         return _multiplayerSetupNode;
     }
 }

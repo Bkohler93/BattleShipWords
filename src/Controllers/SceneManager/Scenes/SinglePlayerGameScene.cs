@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -34,5 +35,20 @@ public class SinglePlayerGameScene : IScene
         };
         _singlePlayerGame = singlePlayerGame;
         return singlePlayerGame;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _singlePlayerGame.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _singlePlayerGame.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _singlePlayerGame;
     }
 }

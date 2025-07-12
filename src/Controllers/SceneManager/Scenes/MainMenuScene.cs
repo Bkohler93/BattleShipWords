@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
+using Godot.NativeInterop;
 
 namespace BattleshipWithWords.Controllers;
 
@@ -46,5 +48,20 @@ public class MainMenuScene : IScene
         };
         _mainMenu = mainMenu;
         return mainMenu;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _mainMenu.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+       _mainMenu.AddNodeToShare(node); 
+    }
+
+    public Node GetNode()
+    {
+        return _mainMenu;
     }
 }

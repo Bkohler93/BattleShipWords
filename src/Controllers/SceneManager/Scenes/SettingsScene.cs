@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -33,5 +34,20 @@ public class SettingsScene : IScene
         };
         _settings = settings;
         return settings;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _settings.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _settings.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _settings;
     }
 }

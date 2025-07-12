@@ -1,9 +1,12 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Games;
 
-public partial class SinglePlayerGame : Control, IGame
+public partial class SinglePlayerGame : Control, IGame, ISceneNode
 {
+    private List<Node> _nodesToKeepAlive = [];
     private Button _pauseButton;
     public Action OnPause { get; set; }
     public Action OnFinish { get; set; }
@@ -19,4 +22,13 @@ public partial class SinglePlayerGame : Control, IGame
         timer.Timeout += OnFinish;
     }
 
+    public List<Node> GetNodesToShare()
+    {
+        return _nodesToKeepAlive;
+    }
+
+    public void AddNodeToShare(Node node)
+    {
+        _nodesToKeepAlive.Add(node);
+    }
 }

@@ -1,9 +1,12 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Services;
 
-public partial class MainMenu : Control
+public partial class MainMenu : Control, ISceneNode
 {
+    private List<Node> _nodesToKeepAlive = [];
     public Action OnSinglePlayerButtonPressed;
     public Action OnMultiplayerButtonPressed;
     public Action OnSettingsButtonPressed;
@@ -31,6 +34,15 @@ public partial class MainMenu : Control
 
     public override void _ExitTree()
     {
-        GD.Print("Exiting...");
+    }
+
+    public List<Node> GetNodesToShare()
+    {
+        return _nodesToKeepAlive;
+    }
+
+    public void AddNodeToShare(Node node)
+    {
+        _nodesToKeepAlive.Add(node); 
     }
 }

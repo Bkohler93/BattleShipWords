@@ -1,3 +1,3 @@
 set -e
 
-dns-sd -R GameTime _peerfinder._tcp local 50000
+dns-sd -R GameTime _peerfinder._udp local 50000

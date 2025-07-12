@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
 using BattleshipWithWords.Services.GameManager;
+using BattleshipWithWords.Utilities;
 using Godot;
 using Godot.Collections;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Game;
 
-public class WordGuessedResponseData : IResponseData
+public class WordGuessedResponseData : UIUpdateData,IResponseData
 {
     public TurnResult Result { get; set; }
     public System.Collections.Generic.Dictionary<char, LetterResponseStatus> ResponseLetters { get; set; }
     public List<string> WordLetterStatus { get; set; }
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         var responseLetters = new Godot.Collections.Dictionary<char, Godot.Collections.Dictionary<string, Variant>>();
         foreach (var (letter, letterStatus) in ResponseLetters)
@@ -43,7 +44,7 @@ public class WordGuessedResponseData : IResponseData
         return d;
     }
     
-    public static WordGuessedResponseData Deserialize(Dictionary data)
+    public static WordGuessedResponseData FromDictionary(Dictionary data)
     {
         var result = new WordGuessedResponseData
         {
@@ -90,7 +91,7 @@ public class UncoveredTileData : IEventData, IResponseData
 {
     public int Row;
     public int Col;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary()
         {
@@ -99,7 +100,7 @@ public class UncoveredTileData : IEventData, IResponseData
         };
     }
 
-    public static UncoveredTileData Deserialize(Dictionary data)
+    public static UncoveredTileData FromDictionary(Dictionary data)
     {
         return new UncoveredTileData()
         {
@@ -115,9 +116,8 @@ public enum ResponseType
     TileUncovered,
 }
 
-public interface IResponseData
+public interface IResponseData: IGodotSerializable
 {
-    public Dictionary Serialize();
 }
 
 
@@ -125,22 +125,22 @@ public class PlayingResponseData : IPlayingData
 {
     public ResponseType Type;
     public IResponseData Data;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary
         {
             ["Type"] = (int)Type,
-            ["Data"] = Data.Serialize()
+            ["Data"] = Data.ToDictionary()
         };
     }
 
-    public static PlayingResponseData Deserialize(Dictionary responseData)
+    public static PlayingResponseData FromDictionary(Dictionary responseData)
     {
        var type = (ResponseType)(int)responseData["Type"];
        IResponseData data = type switch
        {
-           ResponseType.WordGuessed => WordGuessedResponseData.Deserialize((Dictionary)responseData["Data"]),
-           ResponseType.TileUncovered => UncoveredTileResponse.Deserialize((Dictionary)responseData["Data"]),
+           ResponseType.WordGuessed => WordGuessedResponseData.FromDictionary((Dictionary)responseData["Data"]),
+           ResponseType.TileUncovered => UncoveredTileResponse.FromDictionary((Dictionary)responseData["Data"]),
            _ => throw new ArgumentOutOfRangeException()
        };
        return new PlayingResponseData()
@@ -154,7 +154,7 @@ public class PlayingResponseData : IPlayingData
 public class GuessedWordData : IResponseData, IEventData
 {
     public string Word;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary
         {
@@ -162,7 +162,7 @@ public class GuessedWordData : IResponseData, IEventData
         };
     }
 
-    public static GuessedWordData Deserialize(Dictionary data)
+    public static GuessedWordData FromDictionary(Dictionary data)
     {
         return new GuessedWordData {Word = (string)data["Word"]};
     }
@@ -173,7 +173,7 @@ public class GuessedWordData : IResponseData, IEventData
 
 
 
-public class MultiplayerMessage
+public class MultiplayerMessage: IGodotSerializable
 {
     public MultiplayerMessageType Type;
     public IMultiplayerMessageData Data;
@@ -184,53 +184,52 @@ public class MultiplayerMessage
         Data = data;
     }
 
-    public static MultiplayerMessage From(Dictionary serialized)
+    public static MultiplayerMessage FromDictionary(Dictionary serialized)
     {
         var type = (MultiplayerMessageType)(int)serialized["Type"];
         var data = type switch
         {
             MultiplayerMessageType.Setup => null,
-            MultiplayerMessageType.Playing => PlayingData.Deserialize((Dictionary)serialized["Data"]),
+            MultiplayerMessageType.Playing => PlayingData.FromDictionary((Dictionary)serialized["Data"]),
             _ => throw new ArgumentOutOfRangeException()
         };
         return  new MultiplayerMessage(type, data);
     }
 
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary()
         {
             {"Type", (int)Type},
-            {"Data", Data?.Serialize()}
+            {"Data", Data?.ToDictionary()}
         };
     }
 }
 
-public interface IMultiplayerMessageData
+public interface IMultiplayerMessageData : IGodotSerializable
 {
-    public Dictionary Serialize();
 }
 
 public class PlayingData : IMultiplayerMessageData
 {
     public PlayingDataType Type;
     public IPlayingData Data;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary()
         {
             {"Type", (int)Type},
-            {"Data", Data?.Serialize()}
+            {"Data", Data?.ToDictionary()}
         };
     }
 
-    public static PlayingData Deserialize(Dictionary serialized)
+    public static PlayingData FromDictionary(Dictionary serialized)
     {
         var type = (PlayingDataType)(int)serialized["Type"];
         IPlayingData data = type switch
         {
-            PlayingDataType.Event => PlayingEventData.Deserialize((Dictionary)serialized["Data"]),
-            PlayingDataType.Response => PlayingResponseData.Deserialize((Dictionary)serialized["Data"]),
+            PlayingDataType.Event => PlayingEventData.FromDictionary((Dictionary)serialized["Data"]),
+            PlayingDataType.Response => PlayingResponseData.FromDictionary((Dictionary)serialized["Data"]),
             _ => throw new ArgumentOutOfRangeException()
         };
         return new PlayingData()
@@ -248,24 +247,24 @@ public class PlayingEventData: IPlayingData
 {
     public EventType Type;
     public IEventData Data;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary
         {
             {"Type", (int)Type},
-            {"Data", Data?.Serialize()}
+            {"Data", Data?.ToDictionary()}
         };
     }
 
-    public static PlayingEventData Deserialize(Dictionary serialized)
+    public static PlayingEventData FromDictionary(Dictionary serialized)
     {
         var type = (EventType)(int)serialized["Type"];
         IEventData data = type switch
         {
-            EventType.GuessedWord => GuessedWordData.Deserialize((Dictionary)serialized["Data"]),
-            EventType.UncoveredTile => UncoveredTileData.Deserialize((Dictionary)serialized["Data"]),
+            EventType.GuessedWord => GuessedWordData.FromDictionary((Dictionary)serialized["Data"]),
+            EventType.UncoveredTile => UncoveredTileData.FromDictionary((Dictionary)serialized["Data"]),
             EventType.BackspacePressed => null,
-            EventType.KeyPressed => EventKeyPressedData.Deserialize((Dictionary)serialized["Data"]),
+            EventType.KeyPressed => EventKeyPressedData.FromDictionary((Dictionary)serialized["Data"]),
             _ => throw new ArgumentOutOfRangeException()
         };
         return new PlayingEventData()
@@ -279,7 +278,7 @@ public class PlayingEventData: IPlayingData
 public class EventKeyPressedData : IEventData
 {
     public string Key;
-    public Dictionary Serialize()
+    public Dictionary ToDictionary()
     {
         return new Dictionary()
         {
@@ -287,7 +286,7 @@ public class EventKeyPressedData : IEventData
         };
     }
 
-    public static EventKeyPressedData Deserialize(Dictionary serialized)
+    public static EventKeyPressedData FromDictionary(Dictionary serialized)
     {
         return new EventKeyPressedData()
         {
@@ -296,22 +295,21 @@ public class EventKeyPressedData : IEventData
     }
 }
 
-public interface IEventData
+public interface IEventData : IGodotSerializable
 {
-    public Dictionary Serialize();
 }
 
 public enum EventType
 {
+    SetupCompleted,
     GuessedWord,
     UncoveredTile,
     BackspacePressed,
     KeyPressed
 }
 
-public interface IPlayingData
+public interface IPlayingData : IGodotSerializable
 {
-    public Dictionary Serialize();
 }
 
 public enum PlayingDataType

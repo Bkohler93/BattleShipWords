@@ -1,8 +1,11 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers;
 
-public partial class MultiplayerMenu : Control
+public partial class MultiplayerMenu : Control, ISceneNode
 {
+    private List<Node> _nodesToKeepAlive = [];
     [Export]
     private Button _backButton;
     
@@ -15,5 +18,15 @@ public partial class MultiplayerMenu : Control
     {
         _backButton.Pressed += OnBackButtonPressed;
         _localPlayButton.Pressed += OnLocalButtonPressed;
+    }
+
+    public List<Node> GetNodesToShare()
+    {
+        return _nodesToKeepAlive;
+    }
+
+    public void AddNodeToShare(Node node)
+    {
+        _nodesToKeepAlive.Add(node);
     }
 }

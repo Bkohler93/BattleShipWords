@@ -1,10 +1,13 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Services.GameManager;
 
-public partial class MultiplayerGame : Control 
+public partial class MultiplayerGame : Control, ISceneNode
 {
+    private List<Node> _nodesToKeepAlive = [];
     private Gameboard _playerOneGameboard;
     private Gameboard _playerTwoGameboard;
     private MultiplayerGameManager _multiplayerGameManager;
@@ -23,16 +26,19 @@ public partial class MultiplayerGame : Control
         _playerOneGameboard.IsControlledLocally = true;
         _playerTwoGameboard.IsControlledLocally = false;
 
-        _playerOneGameboard.GuessMade += _multiplayerGameManager.GuessMadeEventHandler;
-        _playerOneGameboard.TileUncovered += _multiplayerGameManager.TileUncoveredEventHandler;
-        _playerOneGameboard.BackspacePressed += _multiplayerGameManager.LocalBackspacePressedEventHandler;
-        _playerOneGameboard.KeyPressed += _multiplayerGameManager.LocalKeyPressedEventHandler;
-        _multiplayerGameManager.GuessResultReceived += _playerOneGameboard.GuessResultReceivedEventHandler;
-        _multiplayerGameManager.TileUncoverResultReceived += _playerOneGameboard.TileUncoverResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentGuessed += _playerTwoGameboard.GuessResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentUncoveredTile += _playerTwoGameboard.TileUncoverResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentBackspacePressed += _playerTwoGameboard.BackspacePressedEventHandler;
-        _multiplayerGameManager.OpponentKeyPressed += _playerTwoGameboard.KeyPressedEventHandler;
+        _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
+        // _playerOneGameboard.GuessMade += _multiplayerGameManager.GuessMadeEventHandler;
+        // _playerOneGameboard.TileUncovered += _multiplayerGameManager.TileUncoveredEventHandler;
+        // _playerOneGameboard.BackspacePressed += _multiplayerGameManager.LocalBackspacePressedEventHandler;
+        // _playerOneGameboard.KeyPressed += _multiplayerGameManager.LocalKeyPressedEventHandler;
+        
+        _multiplayerGameManager.LocalUIUpdated += _playerOneGameboard.UIUpdatedHandler;
+        // _multiplayerGameManager.GuessResultReceived += _playerOneGameboard.ProcessGuessResult;
+        // _multiplayerGameManager.TileUncoverResultReceived += _playerOneGameboard.ProcessUncoverTile;
+
+        _multiplayerGameManager.OpponentUIUpdated += _playerTwoGameboard.UIUpdatedHandler;
+        
+        // _multiplayerGameManager.OpponentUncoveredTile += _playerTwoGameboard.ProcessUncoverTile;
         
         _playerOneGameboard.OnRotate += () =>
         {
@@ -52,13 +58,15 @@ public partial class MultiplayerGame : Control
 
     public override void _ExitTree()
     {
-        _playerOneGameboard.GuessMade -= _multiplayerGameManager.GuessMadeEventHandler;
-        _playerOneGameboard.TileUncovered -= _multiplayerGameManager.TileUncoveredEventHandler;
-        _multiplayerGameManager.GuessResultReceived -= _playerOneGameboard.GuessResultReceivedEventHandler;
-        _multiplayerGameManager.TileUncoverResultReceived -= _playerOneGameboard.TileUncoverResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentGuessed -= _playerTwoGameboard.GuessResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentUncoveredTile -= _playerTwoGameboard.TileUncoverResultReceivedEventHandler;
-        _multiplayerGameManager.OpponentBackspacePressed -= _playerTwoGameboard.BackspacePressedEventHandler;
+        _multiplayerGameManager.OpponentUIUpdated -= _playerTwoGameboard.UIUpdatedHandler;     
+        
+        // _playerOneGameboard.GuessMade -= _multiplayerGameManager.GuessMadeEventHandler;
+        // _playerOneGameboard.TileUncovered -= _multiplayerGameManager.TileUncoveredEventHandler;
+        // _multiplayerGameManager.GuessResultReceived -= _playerOneGameboard.ProcessGuessResult;
+        // _multiplayerGameManager.TileUncoverResultReceived -= _playerOneGameboard.ProcessUncoverTile;
+        // _multiplayerGameManager.OpponentGuessed -= _playerTwoGameboard.ProcessGuessResult;
+        // _multiplayerGameManager.OpponentUncoveredTile -= _playerTwoGameboard.ProcessUncoverTile;
+        // _multiplayerGameManager.OpponentBackspacePressed -= _playerTwoGameboard.BackspacePressedEventHandler;
     }
 
     public override void _Ready()
@@ -68,5 +76,15 @@ public partial class MultiplayerGame : Control
         _playerTwoGameboard.InitialRotation = (float)Math.PI;
         AddChild(_playerTwoGameboard);
         AddChild(_playerOneGameboard);
+    }
+
+    public List<Node> GetNodesToShare()
+    {
+        return _nodesToKeepAlive;
+    }
+
+    public void AddNodeToShare(Node node)
+    {
+        _nodesToKeepAlive.Add(node);
     }
 }

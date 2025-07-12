@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
@@ -7,7 +8,7 @@ using Godot;
 
 namespace BattleshipWithWords.Controllers;
 
-public class LocalMatchmakingScene : IScene
+public class LocalMatchmakingScene : IScene 
 {
     private SceneManager _sceneManager;
     private OverlayManager _overlayManager;
@@ -21,6 +22,7 @@ public class LocalMatchmakingScene : IScene
 
     public void Exit(Tween tween,  TransitionDirection direction)
     {
+        _node.Shutdown();
         SceneTransitions.MenuExit(_node, tween, direction);
     }
 
@@ -38,13 +40,29 @@ public class LocalMatchmakingScene : IScene
         };
         localMatchmaking.StartGame = () =>
         {
-            var gameManager = new MultiplayerGameManager();
-            _sceneManager.GetRoot().AddChild(gameManager);
-            gameManager.Init();
-            _sceneManager.HookPeerDisconnected(gameManager);
+            var gameManager = new MultiplayerGameManager(localMatchmaking.ConnectionManager);
+            // _sceneManager.GetRoot().AddChild(gameManager);
+            // gameManager.Init(); //TODO this logic was just moved into the constructor after removing Node dependency
+            // _sceneManager.HookPeerDisconnected(gameManager);
             _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
         _node = localMatchmaking;
         return localMatchmaking;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        var s = _node.GetNodesToShare();
+        return _node.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _node.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _node;
     }
 }

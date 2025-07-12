@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using Godot;
@@ -69,5 +70,20 @@ public class MultiplayerGameScene : IScene
             _overlayManager.Add("win", winOverlay, 5);
         };
         return multiplayerGameNode;
+    }
+
+    public List<Node> GetChildNodesToTransfer()
+    {
+        return _multiplayerGame.GetNodesToShare();
+    }
+
+    public void AddSharedNode(Node node)
+    {
+        _multiplayerGame.AddNodeToShare(node);
+    }
+
+    public Node GetNode()
+    {
+        return _multiplayerGame;
     }
 }

@@ -92,7 +92,6 @@ public class SetupController
     
     private bool _canPlaceDown(int col, int startingRow)
     {
-        GD.Print($"SetupController:: _canPlaceDown({col}, {startingRow})");
         var invalidOffsets = new HashSet<int>();
         for (var i = 0; i < SelectedWord.Length; i++)
         {
@@ -570,7 +569,12 @@ public class SetupController
             }
             SelectedWords.Add(word);
         }
-        SetupNode.SetupCompleteCallback.Invoke(SelectedWords, BoardSelection);
+        // GameManager.CompleteLocalSetup(SelectedWords, BoardSelection);
+        GameManager.LocalUpdateHandler(new UIEvent
+        {
+            Type = EventType.SetupCompleted,
+            Data = new SetupCompletedEventData(SelectedWords, BoardSelection) 
+        });
     }
 }
 
