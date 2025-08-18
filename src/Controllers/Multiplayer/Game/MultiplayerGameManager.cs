@@ -7,7 +7,7 @@ using Godot.Collections;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Game;
 
-public partial class MultiplayerGameManager
+public class MultiplayerGameManager
 {
     public RemoteGameStateManager PlayerTwoGameStateManager;
     private P2PConnectionManager _connectionManager;

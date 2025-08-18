@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class SinglePlayerGameScene : IScene
 {
@@ -13,6 +14,11 @@ public class SinglePlayerGameScene : IScene
     {
         _sceneManager = sceneManager;
         _overlayManager = overlayManager;
+    }
+
+    public void Teardown()
+    {
+        
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -26,7 +32,7 @@ public class SinglePlayerGameScene : IScene
 
     public Node Create()
     {
-        var singlePlayerGame = ResourceLoader.Load<PackedScene>("res://scenes/games/single_player_game.tscn").Instantiate() as SinglePlayerGame;
+        var singlePlayerGame = ResourceLoader.Load<PackedScene>(ResourcePaths.SinglePlayerGameNodePath).Instantiate() as SinglePlayerGame;
         singlePlayerGame!.OnPause = () =>
         {
         };
@@ -35,16 +41,6 @@ public class SinglePlayerGameScene : IScene
         };
         _singlePlayerGame = singlePlayerGame;
         return singlePlayerGame;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _singlePlayerGame.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _singlePlayerGame.AddNodeToShare(node);
     }
 
     public Node GetNode()

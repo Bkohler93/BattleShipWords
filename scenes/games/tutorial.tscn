@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c6u4ydtt3nfas"]
 
-[ext_resource type="Script" uid="uid://buino20frrvle" path="res://src/Games/Tutorial.cs" id="1_aut51"]
+[ext_resource type="Script" uid="uid://buino20frrvle" path="res://src/Nodes/Game/Tutorial.cs" id="1_aut51"]
 
 [node name="Tutorial" type="Control"]
 layout_mode = 3

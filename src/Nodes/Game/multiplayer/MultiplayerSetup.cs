@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using androidplugintest.ConnectionManager;
 using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Controllers.Multiplayer.Setup;
+using BattleshipWithWords.Controllers.SceneManager;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-public partial class MultiplayerSetup : MarginContainer, ISceneNode
+public partial class MultiplayerSetup : MarginContainer, ISharedNodeReceiver
 {
     private List<Node> _nodesToKeepAlive = [];
     private float _separationGap = 40f/6f; 
@@ -14,6 +17,7 @@ public partial class MultiplayerSetup : MarginContainer, ISceneNode
     [Export] private GridContainer _gridContainer;
 
     private SetupController _controller;
+    private ENetP2PPeerService _peerService;
     
     [Export] public Button ConfirmButton;
     [Export] public Button NextWordsButton;
@@ -72,8 +76,7 @@ public partial class MultiplayerSetup : MarginContainer, ISceneNode
         foreach (var name in Theme.GetStyleboxList(GetClass())) {
             GD.Print(name);
         }
-    
-        var tilePackedScene = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/setup_tile.tscn");
+        var tilePackedScene = ResourceLoader.Load<PackedScene>(ResourcePaths.SetupTileNodePath);
         var contentScreenHeight = GetViewportRect().Size.Y - (48 + 34);
         var boardSize = Mathf.Min(contentScreenHeight * 0.40f, 600); // board is reserved 40% of screen height 
         var tileSize = boardSize / 6f - _separationGap; 
@@ -102,13 +105,20 @@ public partial class MultiplayerSetup : MarginContainer, ISceneNode
         }
     }
 
-    public List<Node> GetNodesToShare()
+    public Result ReceiveSharedNodes(Node node)
     {
-        return _nodesToKeepAlive;
-    }
+        GD.Print("MultiplayerSetup:ReceiveSharedNodes()---");
+        _peerService = GodotNodeTree.FindFirstNodeOfType<ENetP2PPeerService>(node);
+        var allReceived = false;
+        
+        if (_peerService != null) // add more null checks if new nodes that should be received from another scene are added here
+        {
+            node.RemoveChild(_peerService);
+            AddChild(_peerService);
+            GD.Print($"MultiplayerSetup:ReceiveSharedNodes()--- added peerService to {GetType().Name}");
+            allReceived = true;
+        }
 
-    public void AddNodeToShare(Node node)
-    {
-        _nodesToKeepAlive.Add(node);
+        return allReceived ? Result.Ok() : Result.Fail("did not receive shared nodes");
     }
 }

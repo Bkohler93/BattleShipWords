@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 using Godot.NativeInterop;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class MainMenuScene : IScene
 {
@@ -15,6 +16,10 @@ public class MainMenuScene : IScene
     {
         _sceneManager = sceneManager;
         _overlayManager = overlayManager;
+    }
+
+    public void Teardown()
+    {
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -29,7 +34,7 @@ public class MainMenuScene : IScene
 
     public Node Create()
     {
-        var mainMenu = ResourceLoader.Load<PackedScene>("res://scenes/menus/main_menu.tscn").Instantiate() as MainMenu;
+        var mainMenu = ResourceLoader.Load<PackedScene>(ResourcePaths.MainMenuNodePath).Instantiate() as MainMenu;
         mainMenu!.OnSinglePlayerButtonPressed = () =>
         {
             _sceneManager.TransitionTo(new SinglePlayerGameScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
@@ -48,16 +53,6 @@ public class MainMenuScene : IScene
         };
         _mainMenu = mainMenu;
         return mainMenu;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _mainMenu.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-       _mainMenu.AddNodeToShare(node); 
     }
 
     public Node GetNode()

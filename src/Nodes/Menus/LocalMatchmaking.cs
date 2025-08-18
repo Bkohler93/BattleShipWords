@@ -7,7 +7,7 @@ using BattleshipWithWords.Controllers.Multiplayer.LocalMatchmakingController;
 
 namespace BattleshipWithWords.Nodes.Menus;
 
-public partial class LocalMatchmaking : Control, ISceneNode
+public partial class LocalMatchmaking : Control
 {
     [Export]
     public Button BackButton;
@@ -32,12 +32,8 @@ public partial class LocalMatchmaking : Control, ISceneNode
         _controller = new LocalMatchmakingController(this);
     }
 
-    public List<Node> GetNodesToShare() => _nodesToKeepAlive;
-    public void AddNodeToShare(Node node) => _nodesToKeepAlive.Add(node);
-
     public P2PConnectionManager ConnectionManager => _controller.ConnectionManager;
     private ENetP2PPeerService _peerService;
-    private readonly List<Node> _nodesToKeepAlive = [];
 
     public override void _Ready()
     {
@@ -59,10 +55,5 @@ public partial class LocalMatchmaking : Control, ISceneNode
 
     public override void _ExitTree()
     {
-    }
-
-    public void PersistSharingNodes()
-    {
-        _nodesToKeepAlive.Add(_peerService);
     }
 }

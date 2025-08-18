@@ -1,16 +1,19 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using BattleshipWithWords.Controllers;
+using androidplugintest.ConnectionManager;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
-using BattleshipWithWords.Services.GameManager;
+using BattleshipWithWords.Controllers.SceneManager;
+using BattleshipWithWords.Utilities;
 
-public partial class MultiplayerGame : Control, ISceneNode
+public partial class MultiplayerGame : Control, ISharedNodeReceiver
 {
     private List<Node> _nodesToKeepAlive = [];
     private Gameboard _playerOneGameboard;
     private Gameboard _playerTwoGameboard;
     private MultiplayerGameManager _multiplayerGameManager;
+    
+    private ENetP2PPeerService _peerService;
 
     private float _playerTwoStartingRotation = (float)Math.PI;
     private float _playerOneStartingRotation;
@@ -18,8 +21,8 @@ public partial class MultiplayerGame : Control, ISceneNode
     public void Init(MultiplayerGameManager gameManager)
     {
         _multiplayerGameManager = gameManager;
-        _playerTwoGameboard = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/gameboard.tscn").Instantiate() as Gameboard;
-        _playerOneGameboard = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/gameboard.tscn").Instantiate() as Gameboard;
+        _playerTwoGameboard = ResourceLoader.Load<PackedScene>(ResourcePaths.GameboardNodePath).Instantiate() as Gameboard;
+        _playerOneGameboard = ResourceLoader.Load<PackedScene>(ResourcePaths.GameboardNodePath).Instantiate() as Gameboard;
         _playerTwoGameboard.Init(_multiplayerGameManager);
         _playerOneGameboard.Init(_multiplayerGameManager);
         
@@ -27,18 +30,8 @@ public partial class MultiplayerGame : Control, ISceneNode
         _playerTwoGameboard.IsControlledLocally = false;
 
         _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
-        // _playerOneGameboard.GuessMade += _multiplayerGameManager.GuessMadeEventHandler;
-        // _playerOneGameboard.TileUncovered += _multiplayerGameManager.TileUncoveredEventHandler;
-        // _playerOneGameboard.BackspacePressed += _multiplayerGameManager.LocalBackspacePressedEventHandler;
-        // _playerOneGameboard.KeyPressed += _multiplayerGameManager.LocalKeyPressedEventHandler;
-        
         _multiplayerGameManager.LocalUIUpdated += _playerOneGameboard.UIUpdatedHandler;
-        // _multiplayerGameManager.GuessResultReceived += _playerOneGameboard.ProcessGuessResult;
-        // _multiplayerGameManager.TileUncoverResultReceived += _playerOneGameboard.ProcessUncoverTile;
-
         _multiplayerGameManager.OpponentUIUpdated += _playerTwoGameboard.UIUpdatedHandler;
-        
-        // _multiplayerGameManager.OpponentUncoveredTile += _playerTwoGameboard.ProcessUncoverTile;
         
         _playerOneGameboard.OnRotate += () =>
         {
@@ -58,15 +51,9 @@ public partial class MultiplayerGame : Control, ISceneNode
 
     public override void _ExitTree()
     {
-        _multiplayerGameManager.OpponentUIUpdated -= _playerTwoGameboard.UIUpdatedHandler;     
-        
-        // _playerOneGameboard.GuessMade -= _multiplayerGameManager.GuessMadeEventHandler;
-        // _playerOneGameboard.TileUncovered -= _multiplayerGameManager.TileUncoveredEventHandler;
-        // _multiplayerGameManager.GuessResultReceived -= _playerOneGameboard.ProcessGuessResult;
-        // _multiplayerGameManager.TileUncoverResultReceived -= _playerOneGameboard.ProcessUncoverTile;
-        // _multiplayerGameManager.OpponentGuessed -= _playerTwoGameboard.ProcessGuessResult;
-        // _multiplayerGameManager.OpponentUncoveredTile -= _playerTwoGameboard.ProcessUncoverTile;
-        // _multiplayerGameManager.OpponentBackspacePressed -= _playerTwoGameboard.BackspacePressedEventHandler;
+        _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
+        _multiplayerGameManager.LocalUIUpdated += _playerOneGameboard.UIUpdatedHandler;
+        _multiplayerGameManager.OpponentUIUpdated += _playerTwoGameboard.UIUpdatedHandler;
     }
 
     public override void _Ready()
@@ -78,13 +65,18 @@ public partial class MultiplayerGame : Control, ISceneNode
         AddChild(_playerOneGameboard);
     }
 
-    public List<Node> GetNodesToShare()
+    public Result ReceiveSharedNodes(Node node)
     {
-        return _nodesToKeepAlive;
-    }
+        _peerService = GodotNodeTree.FindFirstNodeOfType<ENetP2PPeerService>(node);
+        var allReceived = false;
+        
+        if (_peerService != null) // add more null checks if new nodes that should be received from another scene are added here
+        {
+            node.RemoveChild(_peerService);
+            AddChild(_peerService);
+            allReceived = true;
+        }
 
-    public void AddNodeToShare(Node node)
-    {
-        _nodesToKeepAlive.Add(node);
+        return allReceived ? Result.Ok() : Result.Fail("did not receive shared nodes");
     }
 }

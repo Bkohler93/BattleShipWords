@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class MultiplayerGameScene : IScene
 {
@@ -17,6 +18,10 @@ public class MultiplayerGameScene : IScene
         _sceneManager = sceneManager;
         _overlayManager = overlayManager;
         _gameManager = gameManager; 
+    }
+
+    public void Teardown()
+    {
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -42,7 +47,7 @@ public class MultiplayerGameScene : IScene
 
     public Node Create()
     {
-        var multiplayerGameNode = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/multiplayer_game.tscn").Instantiate() as MultiplayerGame;
+        var multiplayerGameNode = ResourceLoader.Load<PackedScene>(ResourcePaths.MultiplayerGameNodePath).Instantiate() as MultiplayerGame;
         _multiplayerGame = multiplayerGameNode;
         _multiplayerGame.Init(_gameManager);
         _gameManager.GameLost += ()=>
@@ -70,16 +75,6 @@ public class MultiplayerGameScene : IScene
             _overlayManager.Add("win", winOverlay, 5);
         };
         return multiplayerGameNode;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _multiplayerGame.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _multiplayerGame.AddNodeToShare(node);
     }
 
     public Node GetNode()

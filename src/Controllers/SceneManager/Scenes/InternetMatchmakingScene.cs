@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Services.ConnectionManager;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class InternetMatchmakingScene : IScene
 {
@@ -16,36 +19,36 @@ public class InternetMatchmakingScene : IScene
         _overlayManager = overlayManager;
     }
 
+    public void Teardown()
+    {
+    }
+
     public void Exit(Tween tween, TransitionDirection direction)
     {
-        // throw new System.NotImplementedException();
+        SceneTransitions.MenuExit(_node, tween, direction);
     }
 
     public void Enter(Tween tween, TransitionDirection direction)
     {
-        throw new System.NotImplementedException();
+        SceneTransitions.MenuEnter(_node, tween, direction);
     }
 
     public Node Create()
     {
-        var matchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/internet_matchmaking.tscn").Instantiate() as InternetMatchmaking;
+        var matchmaking = ResourceLoader.Load<PackedScene>(ResourcePaths.InternetMatchmakingMenuNodePath).Instantiate() as InternetMatchmaking;
         matchmaking!.OnCancelButtonPressed = () =>
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
+        matchmaking!.OnPlayButtonPressed = () =>
+        {
+            GD.Print("have to implement MultiplayerGameManager to function with ServerConnectionManager");
+            // var gameManager = new MultiplayerGameManager(connectionManager);
+            // _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _overlayManager), TransitionDirection.Backward);
+        };
 
         _node = matchmaking;
         return matchmaking;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _node.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _node.AddNodeToShare(node);
     }
 
     public Node GetNode()

@@ -32,6 +32,7 @@ public partial class ENetP2PPeerService : Node, IP2PPeerService
 
     public void Shutdown()
     {
+        GD.Print("ENetP2PPeerService::Shutdown()");
         _disconnectMultiplayerPeer();
         _disconnectSignals();
     } 

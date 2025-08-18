@@ -3,30 +3,25 @@ using System;
 using System.Collections.Generic;
 using BattleshipWithWords.Controllers;
 
-public partial class MultiplayerMenu : Control, ISceneNode
+public partial class MultiplayerMenu : Control
 {
-    private List<Node> _nodesToKeepAlive = [];
     [Export]
     private Button _backButton;
     
     [Export]
     private Button _localPlayButton;
+    
+    [Export]
+    private Button _onlinePlayButton;
+    
     public Action OnBackButtonPressed;
     public Action OnLocalButtonPressed;
+    public Action OnOnlineButtonPressed;
     
     public override void _Ready()
     {
         _backButton.Pressed += OnBackButtonPressed;
         _localPlayButton.Pressed += OnLocalButtonPressed;
-    }
-
-    public List<Node> GetNodesToShare()
-    {
-        return _nodesToKeepAlive;
-    }
-
-    public void AddNodeToShare(Node node)
-    {
-        _nodesToKeepAlive.Add(node);
+        _onlinePlayButton.Pressed += OnOnlineButtonPressed;
     }
 }

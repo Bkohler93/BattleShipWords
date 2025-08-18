@@ -7,6 +7,5 @@
   <ItemGroup>
     <Folder Include="android\" />
     <Folder Include="scenes\" />
-    <Folder Include="src\Nodes\Game\components\" />
   </ItemGroup>
 </Project>

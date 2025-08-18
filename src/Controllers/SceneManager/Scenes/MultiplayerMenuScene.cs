@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class MultiplayerMenuScene: IScene
 {
@@ -14,6 +15,10 @@ public class MultiplayerMenuScene: IScene
     {
         _sceneManager = sceneManager;
         _overlayManager = overlayManager;
+    }
+
+    public void Teardown()
+    {
     }
 
     public void Exit(Tween tween, TransitionDirection direction)
@@ -28,7 +33,7 @@ public class MultiplayerMenuScene: IScene
 
     public Node Create()
     {
-        var multiplayerMenu = ResourceLoader.Load<PackedScene>("res://scenes/menus/multiplayer.tscn").Instantiate() as MultiplayerMenu;
+        var multiplayerMenu = ResourceLoader.Load<PackedScene>(ResourcePaths.MultiplayerMenuNodePath).Instantiate() as MultiplayerMenu;
         multiplayerMenu!.OnBackButtonPressed = () =>
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
@@ -37,18 +42,12 @@ public class MultiplayerMenuScene: IScene
         {
             _sceneManager.TransitionTo(new LocalMatchmakingScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
         };
+        multiplayerMenu.OnOnlineButtonPressed = () =>
+        {
+            _sceneManager.TransitionTo(new InternetMatchmakingScene(_sceneManager, _overlayManager), TransitionDirection.Forward);
+        };
         _multiplayerMenu = multiplayerMenu;
         return multiplayerMenu;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _multiplayerMenu.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _multiplayerMenu.AddNodeToShare(node);
     }
 
     public Node GetNode()

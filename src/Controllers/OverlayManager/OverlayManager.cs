@@ -9,7 +9,7 @@ public class OverlayManager
     private Node _root;
     // private readonly Stack<IOverlay> _overlays = new Stack<IOverlay>();
     private readonly Dictionary<string, IOverlay> _overlayDict = new Dictionary<string, IOverlay>();
-    private SceneManager _sceneManager;
+    private SceneManager.SceneManager _sceneManager;
 
     public OverlayManager(Node root)
     {
@@ -54,7 +54,7 @@ public class OverlayManager
         overlay.GetNode().QueueFree();
     }
 
-    public void SetSceneManager(SceneManager sceneManager)
+    public void SetSceneManager(SceneManager.SceneManager sceneManager)
     {
         _sceneManager = sceneManager;
     }

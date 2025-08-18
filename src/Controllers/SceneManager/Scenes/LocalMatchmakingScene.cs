@@ -4,9 +4,10 @@ using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Nodes.Menus;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class LocalMatchmakingScene : IScene 
 {
@@ -20,9 +21,13 @@ public class LocalMatchmakingScene : IScene
         _overlayManager = overlayManager;
     }
 
-    public void Exit(Tween tween,  TransitionDirection direction)
+    public void Teardown()
     {
         _node.Shutdown();
+    }
+
+    public void Exit(Tween tween,  TransitionDirection direction)
+    {
         SceneTransitions.MenuExit(_node, tween, direction);
     }
 
@@ -33,7 +38,7 @@ public class LocalMatchmakingScene : IScene
 
     public Node Create()
     {
-        var localMatchmaking = ResourceLoader.Load<PackedScene>("res://scenes/menus/local_matchmaking.tscn").Instantiate() as LocalMatchmaking;
+        var localMatchmaking = ResourceLoader.Load<PackedScene>(ResourcePaths.LocalMatchmakingMenuNodePath).Instantiate() as LocalMatchmaking;
         localMatchmaking.BackToMainMenu = () =>
         {
             _sceneManager.TransitionTo(new MultiplayerMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
@@ -48,17 +53,6 @@ public class LocalMatchmakingScene : IScene
         };
         _node = localMatchmaking;
         return localMatchmaking;
-    }
-
-    public List<Node> GetChildNodesToTransfer()
-    {
-        var s = _node.GetNodesToShare();
-        return _node.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _node.AddNodeToShare(node);
     }
 
     public Node GetNode()

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Games;
 
-public partial class Tutorial : Control, IGame, ISceneNode
+public partial class Tutorial : Control, IGame
 {
     private List<Node> _nodesToKeepAlive = [];
     private Label _label;

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://csc7beulkeum"]
 
-[ext_resource type="Script" uid="uid://dyis83y6kuxm4" path="res://src/Nodes/Game/multiplayer/Gameboard.cs" id="1_kv177"]
+[ext_resource type="Script" uid="uid://dyis83y6kuxm4" path="res://src/Nodes/Game/components/Gameboard.cs" id="1_kv177"]
 [ext_resource type="Theme" uid="uid://g4rfga2jglnb" path="res://themes/game/board.tres" id="1_v6jd3"]
 
 [node name="Gameboard" type="Control" node_paths=PackedStringArray("_switchBoardBtn", "_guessBtn", "_emoteBtn", "_gameBoardLabel", "_wordGuessLabel", "_gridContainer", "_foundIndicatorHBox", "_topKeyboardRow", "_middleKeyboardRow", "_bottomKeyboardRow")]

@@ -96,6 +96,7 @@ public class PeerFinder
 
         _startedCallable = Callable.From(() =>
         {
+            GD.Print("PeerFinder started");
             IsActive = true;
             Started?.Invoke();
             _listener?.OnStarted();
@@ -104,6 +105,7 @@ public class PeerFinder
 
         _stoppedCallable = Callable.From(() =>
         {
+            GD.Print("PeerFinder stopped");
             Stopped?.Invoke();
             _listener?.OnStopped();
         });
@@ -111,6 +113,7 @@ public class PeerFinder
 
         _startErrorOccurredCallable = Callable.From((string msg) =>
         {
+            GD.Print("PeerFinder Start error occurred");
             StartErrorOccured?.Invoke(msg);
             _listener?.OnStartErrorOccurred(msg);
         });
@@ -118,6 +121,7 @@ public class PeerFinder
 
         _stopErrorOccurredCallable = Callable.From((string msg) =>
         {
+            GD.Print("PeerFinder Stop error occurred");
             StopErrorOccured?.Invoke(msg);
             _listener?.OnStopErrorOccured(msg);
         });
@@ -125,6 +129,7 @@ public class PeerFinder
 
         _failedToResolveServiceCallable = Callable.From((string msg) =>
         {
+            GD.Print("PeerFinder failed to resolve service");
             FailedToResolveService?.Invoke(msg);
             _listener?.OnFailedToResolveService(msg);
         });
@@ -132,6 +137,7 @@ public class PeerFinder
 
         _foundServiceIosCallable = Callable.From((string peerName, string ip, int port) =>
         {
+            GD.Print("PeerFinder found service");
             var serviceInfo = new ServiceInfo
             {
                 Ip = ip,
@@ -144,6 +150,7 @@ public class PeerFinder
         });
         _foundServiceAndroidCallable = Callable.From((string peerName, string ip, string port) =>
         {
+            GD.Print("PeerFinder found service");
             int portInt = Int32.Parse(port);
             var serviceInfo = new ServiceInfo
             {

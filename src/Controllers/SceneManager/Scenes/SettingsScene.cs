@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class SettingsScene : IScene
 {
@@ -16,6 +17,10 @@ public class SettingsScene : IScene
         _overlayManager = overlayManager;
     }
 
+    public void Teardown()
+    {
+    }
+
     public void Exit(Tween tween, TransitionDirection direction)
     {
     }
@@ -27,7 +32,7 @@ public class SettingsScene : IScene
 
     public Node Create()
     {
-        var settings = ResourceLoader.Load<PackedScene>("res://scenes/menus/settings.tscn").Instantiate() as Settings;
+        var settings = ResourceLoader.Load<PackedScene>(ResourcePaths.SettingsMenuNodePath).Instantiate() as Settings;
         settings!.OnBackButtonPressed = () =>
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
@@ -36,15 +41,6 @@ public class SettingsScene : IScene
         return settings;
     }
 
-    public List<Node> GetChildNodesToTransfer()
-    {
-        return _settings.GetNodesToShare();
-    }
-
-    public void AddSharedNode(Node node)
-    {
-        _settings.AddNodeToShare(node);
-    }
 
     public Node GetNode()
     {

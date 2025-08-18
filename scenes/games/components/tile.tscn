@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://qeq134e1dwpp"]
 
-[ext_resource type="Script" uid="uid://by3m8j4f0tncm" path="res://src/Nodes/Game/multiplayer/Tile.cs" id="1_2jrbd"]
+[ext_resource type="Script" uid="uid://by3m8j4f0tncm" path="res://src/Nodes/Game/components/Tile.cs" id="1_2jrbd"]
 
 [node name="Tile" type="Button"]
 custom_minimum_size = Vector2(60, 60)

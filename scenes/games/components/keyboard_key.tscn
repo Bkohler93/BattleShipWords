@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bytq1smcr2wm1"]
 
-[ext_resource type="Script" uid="uid://oy4uulu67ekn" path="res://src/Nodes/Game/multiplayer/KeyboardKey.cs" id="1_83s5u"]
+[ext_resource type="Script" uid="uid://oy4uulu67ekn" path="res://src/Nodes/Game/components/KeyboardKey.cs" id="1_83s5u"]
 [ext_resource type="Theme" uid="uid://g4rfga2jglnb" path="res://themes/game/board.tres" id="1_q0s70"]
 [ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="3_hn0qw"]
 

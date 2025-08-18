@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Services;
 
-public partial class MainMenu : Control, ISceneNode
+public partial class MainMenu : Control
 {
-    private List<Node> _nodesToKeepAlive = [];
     public Action OnSinglePlayerButtonPressed;
     public Action OnMultiplayerButtonPressed;
     public Action OnSettingsButtonPressed;
@@ -34,15 +33,5 @@ public partial class MainMenu : Control, ISceneNode
 
     public override void _ExitTree()
     {
-    }
-
-    public List<Node> GetNodesToShare()
-    {
-        return _nodesToKeepAlive;
-    }
-
-    public void AddNodeToShare(Node node)
-    {
-        _nodesToKeepAlive.Add(node); 
     }
 }

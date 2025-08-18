@@ -1,3 +1,4 @@
+using BattleshipWithWords.Controllers.SceneManager;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
@@ -5,10 +6,10 @@ namespace BattleshipWithWords.Controllers;
 
 public class AppManager
 {
-    private SceneManager _sceneManager;
+    private SceneManager.SceneManager _sceneManager;
     private OverlayManager _overlayManager;
 
-    public AppManager(SceneManager sceneManager, OverlayManager overlayManager)
+    public AppManager(SceneManager.SceneManager sceneManager, OverlayManager overlayManager)
     {
         _sceneManager = sceneManager;
         _overlayManager = overlayManager;

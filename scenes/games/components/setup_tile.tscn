@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bkkrjpm0h5xxf"]
 
 [ext_resource type="Theme" uid="uid://g4rfga2jglnb" path="res://themes/game/board.tres" id="1_xbv1e"]
-[ext_resource type="Script" uid="uid://cg23djltseu4b" path="res://src/Nodes/Game/multiplayer/SetupTile.cs" id="2_xbv1e"]
+[ext_resource type="Script" uid="uid://cg23djltseu4b" path="res://src/Nodes/Game/components/SetupTile.cs" id="2_xbv1e"]
 
 [node name="SetupTile" type="Panel" node_paths=PackedStringArray("LetterLabel")]
 custom_minimum_size = Vector2(50, 50)
@@ -17,6 +17,7 @@ size_flags_vertical = 3
 theme = ExtResource("1_xbv1e")
 theme_type_variation = &"tile"
 script = ExtResource("2_xbv1e")
+_directionSensitivity = null
 LetterLabel = NodePath("Label")
 
 [node name="Label" type="Label" parent="."]

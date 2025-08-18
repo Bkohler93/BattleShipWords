@@ -4,6 +4,7 @@ using androidplugintest.ConnectionManager;
 using androidplugintest.PeerFinderPlugin;
 using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Nodes.Menus;
+using BattleshipWithWords.Utilities;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.LocalMatchmakingController;
@@ -17,6 +18,7 @@ public class LocalMatchmakingController
 
     private readonly List<ServiceInfo> _peerList = [];
     private int _selectedPeerIndex;
+    private bool _matchmakingCompleted;
 
     public LocalMatchmakingController(LocalMatchmaking matchmakingNode)
     {
@@ -52,8 +54,8 @@ public class LocalMatchmakingController
 
     public void CompleteMatchmaking()
     {
+        _matchmakingCompleted = true;
         GD.Print("completing matchmaking");
-        _matchmakingNode.PersistSharingNodes();
         _matchmakingNode.StartGame.Invoke();
     }
 
@@ -133,7 +135,7 @@ public class LocalMatchmakingController
     public void Shutdown()
     {
         PeerFinder.Shutdown();
-        if (!_matchmakingNode.GetNodesToShare().Exists(n => n.GetType().Name == nameof(ENetP2PPeerService)))
+        if (!_matchmakingCompleted)
             ConnectionManager.Shutdown();
         ConnectionManager.DisconnectSignals();
     }

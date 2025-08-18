@@ -3,7 +3,7 @@ using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class SceneManager
 {
@@ -24,24 +24,31 @@ public class SceneManager
         var tween = _rootNode.GetTree().CreateTween().SetParallel();
         _currentScene?.Exit(tween, direction);
         
-        var sharedChildren = _currentScene?.GetChildNodesToTransfer();
         var previousNode = _currentScene?.GetNode();
+        var previousScene = _currentScene;
         
         _currentScene = newScene;
         var currentNode = _currentScene.Create();
         _rootNode.AddChild(currentNode);
-        
-        if (previousNode != null && sharedChildren?.Count > 0)
+
+        if (currentNode is ISharedNodeReceiver c)
         {
-            sharedChildren.ForEach(n =>
-            {
-                previousNode.RemoveChild(n);
-                currentNode.AddChild(n);
-                GD.Print($"Adding node to persist across scenes: {n.GetType().Name}");
-                _currentScene.AddSharedNode(n);
-            }); 
+            var result = c.ReceiveSharedNodes(previousNode);
+            if (!result.Success) 
+                throw new Exception($"{currentNode.GetType().Name} did not receive the nodes it depends on from {previousNode!.GetType().Name}");
         }
         
+        // if (previousNode != null && sharedChildren?.Count > 0)
+        // {
+        //     sharedChildren.ForEach(n =>
+        //     {
+        //         previousNode.RemoveChild(n);
+        //         currentNode.AddChild(n);
+        //         GD.Print($"Adding node to persist across scenes: {n.GetType().Name}");
+        //         _currentScene.AddSharedNode(n);
+        //     }); 
+        // }
+        previousScene?.Teardown(); 
         _currentScene.Enter(tween, direction);
         tween.Play();
         tween.Finished += () =>

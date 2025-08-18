@@ -1,6 +1,7 @@
 using Godot;
 using BattleshipWithWords;
 using BattleshipWithWords.Controllers;
+using BattleshipWithWords.Controllers.SceneManager;
 
 public partial class AppRoot : Control
 {

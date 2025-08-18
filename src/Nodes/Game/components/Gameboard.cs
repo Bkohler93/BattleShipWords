@@ -6,6 +6,7 @@ using BattleshipWithWords.Controllers.Multiplayer.Setup;
 using BattleshipWithWords.Nodes.Game.multiplayer;
 using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Services.WordList;
+using BattleshipWithWords.Utilities;
 
 public partial class Gameboard : Control
 {
@@ -189,7 +190,7 @@ public partial class Gameboard : Control
 
     private void _setupKeyboard()
     {
-        var keyboardKeyScene = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/keyboard_key.tscn");
+        var keyboardKeyScene = ResourceLoader.Load<PackedScene>(ResourcePaths.KeyboardKeyNodePath);
        var topRowLetters =  new List<string>{"Q","W","E","R","T","Y","U","I","O","P"};
        var middleRowLetters = new List<string>{"A","S","D","F","G","H","J","K","L"};
        var bottomRowLetters = new List<string>{"Z","X","C","V","B","N","M"};
@@ -257,7 +258,7 @@ public partial class Gameboard : Control
 
     private void _setupTiles()
     {
-        var tilePackedScene = ResourceLoader.Load<PackedScene>("res://scenes/games/multiplayer/tile.tscn");
+        var tilePackedScene = ResourceLoader.Load<PackedScene>(ResourcePaths.TileNodePath);
         var contentScreenHeight = GetViewportRect().Size.Y - (48 + 34);
         var boardSize = Mathf.Min(contentScreenHeight * 0.40f, 600); // board is reserved 40% of screen height 
         var tileSize = boardSize / 6f - _separationGap;

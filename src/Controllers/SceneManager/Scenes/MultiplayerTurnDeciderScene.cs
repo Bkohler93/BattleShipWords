@@ -3,7 +3,7 @@ using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class MultiplayerTurnDeciderScene : IScene
 {
@@ -17,6 +17,10 @@ public class MultiplayerTurnDeciderScene : IScene
         _gameManager = gameManager;
         _overlayManager = overlayManager;
         _sceneManager = sceneManager;
+    }
+
+    public void Teardown()
+    {
     }
 
     public void Exit(Tween tween, TransitionDirection direction)

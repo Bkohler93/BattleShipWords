@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BattleshipWithWords.Networkutils;
+using BattleshipWithWords.Utilities;
 using Godot;
 
-namespace BattleshipWithWords.Controllers;
+namespace BattleshipWithWords.Controllers.SceneManager;
 
 public class TutorialScene : IScene
 {
@@ -15,7 +16,11 @@ public class TutorialScene : IScene
         _sceneManager = sceneManager; 
         _overlayManager = overlayManager;
     }
-    
+
+    public void Teardown()
+    {
+    }
+
     public void Exit(Tween tween, TransitionDirection direction)
     {
     }
@@ -27,7 +32,7 @@ public class TutorialScene : IScene
 
     public Node Create()
     {
-        var tutorial = ResourceLoader.Load<PackedScene>("res://scenes/games/tutorial.tscn").Instantiate() as Tutorial;
+        var tutorial = ResourceLoader.Load<PackedScene>(ResourcePaths.TutorialNodePath).Instantiate() as Tutorial;
         tutorial!.OnFinish = () =>
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Forward);

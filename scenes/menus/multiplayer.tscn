@@ -45,7 +45,7 @@ Button/styles/hover = SubResource("StyleBoxFlat_etamx")
 Button/styles/normal = SubResource("StyleBoxFlat_uo45u")
 Button/styles/pressed = SubResource("StyleBoxFlat_d2otk")
 
-[node name="MultiplayerMenu" type="MarginContainer" node_paths=PackedStringArray("_backButton", "_localPlayButton")]
+[node name="MultiplayerMenu" type="MarginContainer" node_paths=PackedStringArray("_backButton", "_localPlayButton", "_onlinePlayButton")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -55,6 +55,7 @@ theme = ExtResource("1_rtqs1")
 script = ExtResource("2_kvkvu")
 _backButton = NodePath("VBoxContainer2/Control3/BackButton")
 _localPlayButton = NodePath("VBoxContainer2/Control2/LocalButton")
+_onlinePlayButton = NodePath("VBoxContainer2/Control2/OnlineButton")
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -81,25 +82,21 @@ theme_override_font_sizes/font_size = 64
 text = "Multiplayer"
 horizontal_alignment = 1
 
-[node name="Control2" type="Control" parent="VBoxContainer2"]
+[node name="Control2" type="VBoxContainer" parent="VBoxContainer2"]
 layout_mode = 2
-size_flags_vertical = 3
+theme_override_constants/separation = 24
 
 [node name="LocalButton" type="Button" parent="VBoxContainer2/Control2"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.5
-offset_top = -11.5
-offset_right = 20.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 4
 theme = ExtResource("1_rtqs1")
 text = "Local"
+
+[node name="OnlineButton" type="Button" parent="VBoxContainer2/Control2"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("1_rtqs1")
+text = "Online"
 
 [node name="Control3" type="Control" parent="VBoxContainer2"]
 layout_mode = 2
