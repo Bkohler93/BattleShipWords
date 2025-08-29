@@ -12,7 +12,7 @@ public enum PlacementDirection
 
 public partial class SetupTile : Panel 
 {
-    private SetupController _setupController;
+    private ISetupTileEventHandler _eventHandler;
     [Export] private int _directionSensitivity = 8;
     [Export] public Label LetterLabel;
     
@@ -26,10 +26,10 @@ public partial class SetupTile : Panel
     
     private Dictionary<string, StyleBox> _styleBoxDict;
 
-    public void Init(SetupController controller, int row, int col, float size, Dictionary<string,StyleBox> styleBoxDict)
+    public void Init(ISetupTileEventHandler eventHandler, int row, int col, float size, Dictionary<string,StyleBox> styleBoxDict)
     {
         _controller = new TileController(this);
-        _setupController = controller; 
+        _eventHandler = eventHandler; 
         Row = row;
         Col = col;
         _size = size;
@@ -49,7 +49,7 @@ public partial class SetupTile : Panel
 
     public override void _GuiInput(InputEvent @event)
     {
-        _setupController.HandleTileGuiEvent(@event, this);
+        _eventHandler.HandleTileGuiEvent(@event, this);
     }
     
     public static bool operator ==(SetupTile a, SetupTile b) => a!.Col == b!.Col && a.Row == b.Row;
@@ -116,3 +116,7 @@ public partial class SetupTile : Panel
     }
 }
 
+public interface ISetupTileEventHandler
+{
+    void HandleTileGuiEvent(InputEvent @event, SetupTile setupTile);
+}

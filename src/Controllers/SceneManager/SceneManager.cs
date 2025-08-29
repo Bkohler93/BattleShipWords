@@ -29,14 +29,13 @@ public class SceneManager
         
         _currentScene = newScene;
         var currentNode = _currentScene.Create();
-        _rootNode.AddChild(currentNode);
-
         if (currentNode is ISharedNodeReceiver c)
         {
             var result = c.ReceiveSharedNodes(previousNode);
             if (!result.Success) 
                 throw new Exception($"{currentNode.GetType().Name} did not receive the nodes it depends on from {previousNode!.GetType().Name}");
         }
+        _rootNode.AddChild(currentNode);
         
         // if (previousNode != null && sharedChildren?.Count > 0)
         // {

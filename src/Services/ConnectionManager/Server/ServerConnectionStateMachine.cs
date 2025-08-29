@@ -50,7 +50,6 @@ public class IdleState(ServerConnectionStateMachine stateMachine, ServerConnecti
                 ThrowStateException(newState);
                 break;
             case WebSocketPeer.State.Closed:
-                ThrowStateException(newState);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);

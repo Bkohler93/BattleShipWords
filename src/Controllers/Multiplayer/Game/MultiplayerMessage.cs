@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using BattleshipWithWords.Services.GameManager;
 using BattleshipWithWords.Utilities;
 using Godot;
@@ -19,9 +20,9 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
         {
             var keyboardStatus = (int)letterStatus.KeyboardStatus;
             Array<string> foundCoords = [];
-            foreach (var (row, col, status) in letterStatus.FoundCoords)
+            foreach (var letterFoundCoordinate in letterStatus.UncoveredGameTiles)
             {
-                foundCoords.Add($"{row},{col},{(int)status}");    
+                foundCoords.Add($"{letterFoundCoordinate.Coordinate.Row},{letterFoundCoordinate.Coordinate.Col},{(int)letterFoundCoordinate.GameTileStatus}");    
             }
 
             responseLetters[letter] = new Godot.Collections.Dictionary<string, Variant>
@@ -58,7 +59,7 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
             var letterData = (Dictionary)responseLetters[letter];
             var keyboardStatus = (KeyboardLetterStatus)(int)letterData["keyboardStatus"];
 
-            var foundCoords = new List<(int, int, GameTileStatus)>();
+            var foundCoords = new List<LetterFoundCoordinate>();
             var coordsArray = (Godot.Collections.Array)letterData["foundCoords"];
             foreach (string coordStr in coordsArray)
             {
@@ -66,13 +67,22 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
                 int row = int.Parse(parts[0]);
                 int col = int.Parse(parts[1]);
                 int status = int.Parse(parts[2]);
-                foundCoords.Add((row, col, (GameTileStatus)status));
+                var letterFoundCoordinate = new LetterFoundCoordinate
+                {
+                    Coordinate = new Coordinate
+                    {
+                        Row = row,
+                        Col =col 
+                    },
+                    GameTileStatus =(GameTileStatus)status 
+                };
+                foundCoords.Add(letterFoundCoordinate);
             }
 
             result.ResponseLetters[letter] = new LetterResponseStatus
             {
                 KeyboardStatus = keyboardStatus,
-                FoundCoords = foundCoords
+                UncoveredGameTiles = foundCoords
             };
         }
 
@@ -295,6 +305,9 @@ public class EventKeyPressedData : IEventData
     }
 }
 
+[JsonDerivedType(typeof(EventKeyPressedData), typeDiscriminator: "EventKeyPressed")]
+[JsonDerivedType(typeof(GuessedWordData), typeDiscriminator: "GuessedWord")]
+[JsonDerivedType(typeof(UncoveredTileData), typeDiscriminator: "UncoveredTile")]
 public interface IEventData : IGodotSerializable
 {
 }

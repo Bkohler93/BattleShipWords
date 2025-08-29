@@ -8,18 +8,17 @@ public class GodotNodeTree
     {
         foreach (var child in root.GetChildren())
         {
-            if (child is T typedChild)
+            switch (child)
             {
-                GD.Print($"FindFirstNodeOfType<{typeof(T).Name}>()--- found node");
-                return typedChild;
-                
-            }
-
-            if (child is Node node)
-            {
-                var result = FindFirstNodeOfType<T>(node);
-                if (result != null)
-                    return result;
+                case T typedChild:
+                    return typedChild;
+                case Node node:
+                {
+                    var result = FindFirstNodeOfType<T>(node);
+                    if (result != null)
+                        return result;
+                    break;
+                }
             }
         }
         return null;

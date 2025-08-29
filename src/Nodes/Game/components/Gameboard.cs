@@ -31,7 +31,7 @@ public partial class Gameboard : Control
     public Action OnRotate;
     public bool IsControlledLocally;
 
-    private MultiplayerGameManager _gameManager;
+    // private MultiplayerGameManager _gameManager;
     private FileWordChecker _fileWordChecker;
     private List<string> _guessedWords = [];
     private bool _shouldCheckStuff = true;
@@ -50,7 +50,7 @@ public partial class Gameboard : Control
 
     public void Init(MultiplayerGameManager gameManager)
     {
-        _gameManager = gameManager;
+        // _gameManager = gameManager;
         _fileWordChecker = new FileWordChecker("res://data/wordlists/bigwordlist.txt");
     }
 
@@ -310,11 +310,11 @@ public partial class Gameboard : Control
                     throw new ArgumentOutOfRangeException();
             }
             
-            foreach (var (row, col, status) in letterStatus.FoundCoords)
+            foreach (var letterFoundCoordinate in letterStatus.UncoveredGameTiles)
             {
-                var tile = _gameBoard[row][col];
+                var tile = _gameBoard[letterFoundCoordinate.Coordinate.Row][letterFoundCoordinate.Coordinate.Col];
 
-                switch (status)
+                switch (letterFoundCoordinate.GameTileStatus)
                 {
                     case GameTileStatus.WordFound:
                         tile.SetOutOfPlay(letter.ToString());

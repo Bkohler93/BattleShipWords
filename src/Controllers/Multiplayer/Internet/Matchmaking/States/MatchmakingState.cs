@@ -1,4 +1,5 @@
 using System;
+using BattleshipWithWords.Nodes.Globals;
 using BattleshipWithWords.Services.ConnectionManager;
 using BattleshipWithWords.Services.ConnectionManager.Server;
 using Godot;
@@ -16,10 +17,17 @@ public class MatchmakingState : InternetMatchmakingState, IServerConnectionListe
 
     public override void Enter()
     {
-        _controller.SetConnectionListener(this);
+        _controller.Node.HidePlayButton();
         _controller.Node.SetInfo("Connected to matchmaking server.");
-        var num = new Random().Next(0, 100);
-        var req = MatchmakingRequest.New($"DooDooFucker{num}");
+        var timeCreated = DateTimeOffset.Now.ToUnixTimeSeconds();
+        var req = new RequestMatchmaking
+        {
+            UserId = _controller.Node.Auth.UserId,
+            Name = _controller.Node.Auth.Name,
+            TimeCreated = timeCreated,
+            Skill = 100,
+            Region = "na" 
+        };
         
         var res = _controller.Send(req);
         if (res.Success)
@@ -45,47 +53,67 @@ public class MatchmakingState : InternetMatchmakingState, IServerConnectionListe
         throw new System.NotImplementedException();
     }
 
-    public void Connecting()
+    public override void Connecting()
     {
         GD.Print("connecting to matchmaking server");
     }
 
-    public void Connected()
+    public override void Connected()
     {
         GD.Print("connected while in MatchmakingState");
     }
 
-    public void UnableToConnect()
+    public override void UnableToConnect()
     {
         GD.Print("Unable to send matchmaking request to matchmaking server");
     }
 
-    public void Disconnected()
+    public override void Disconnected()
     {
         GD.Print("disconnected while in MatchmakingState");
     }
 
-    public void Reconnecting()
+    public override void Reconnecting()
     {
         GD.Print("reconnecting to matchmaking server");
     }
 
-    public void Reconnected()
+    public override void Reconnected()
     {
         GD.Print("reconnected while in MatchmakingState");
     }
 
-    public void Receive(BaseServerReceiveMessage message)
+    public override void Receive(IServerReceivable message)
     {
-        if (message.Payload is MatchmakingResponse res)
+        switch (message)
         {
-            _controller.TransitionTo(new MatchmadeState(_controller, res));
+            case PlayerLeftRoom msg:
+                GD.Print($"Player {msg.UserLeftId} left the room");
+                _controller.Node.SetInfo("Player left the room. Continuing to search...");
+                break;
+            case PlayerJoinedRoom msg:
+                GD.Print($"Player {msg.UserJoinedId} joined the room.");
+                _controller.Node.SetInfo("Player joined the room.");
+                break;
+            case RoomChanged msg:
+                GD.Print($"Changed room to {msg.NewRoomId} with {msg.PlayerCount} players.");
+                _controller.Node.SetInfo($"Joined room with {msg.PlayerCount} players.");
+                break;
+            case RoomFull msg:
+                GD.Print($"Full room[{msg.RoomId}] with {msg.PlayerCount} players.");
+                _controller.TransitionTo(new MatchmadeState(_controller, msg));
+                break;
         }
     }
 
-    public void Disconnecting()
+    public override void Disconnecting()
     {
         GD.Print("disconnecting while in MatchmakingState");
+    }
+
+    public override void HttpResponse(string response)
+    {
+        throw new NotImplementedException();
     }
 }
 

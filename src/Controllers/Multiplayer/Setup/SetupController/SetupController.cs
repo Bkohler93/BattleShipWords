@@ -7,7 +7,7 @@ using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Setup;
 
-public class SetupController
+public class SetupController : ISetupTileEventHandler
 {
     public MultiplayerGameManager GameManager;
     public SetupState CurrentState;
@@ -562,7 +562,7 @@ public class SetupController
         SelectedWords = [];
         for (var i = 0; i < 3; i++)
         {
-            var word = WordOptions[i][WordsSelectionIndex];
+            var word = WordOptions[i][0];
             for (var j = 0; j < word.Length; j++)
             {
                 BoardSelection[i].Add((i*2,j));
@@ -570,11 +570,6 @@ public class SetupController
             SelectedWords.Add(word);
         }
         // GameManager.CompleteLocalSetup(SelectedWords, BoardSelection);
-        GameManager.LocalUpdateHandler(new UIEvent
-        {
-            Type = EventType.SetupCompleted,
-            Data = new SetupCompletedEventData(SelectedWords, BoardSelection) 
-        });
     }
 }
 

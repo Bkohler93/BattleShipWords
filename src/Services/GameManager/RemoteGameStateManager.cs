@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
+using BattleshipWithWords.Utilities;
 using Godot;
 using Godot.Collections;
 
@@ -129,7 +130,18 @@ public class RemoteGameStateManager
             foreach (var letterLocation in letterLocations.Where(letterLocation => letterLocation.letterIndexInWord == i))
             {
                 var status = _hiddenWords[letterLocation.wordIndex].IsFound ? GameTileStatus.WordFound : GameTileStatus.Uncovered;
-                letterResponseStatus.FoundCoords.Add((letterLocation.row, letterLocation.col, status));
+                var letterFoundCoord = new LetterFoundCoordinate
+                {
+                    Coordinate = new Coordinate
+                    {
+                        Row = letterLocation.row,
+                        Col = letterLocation.col,
+                    },
+                    GameTileStatus =status 
+                };
+                
+                // letterResponseStatus.UncoveredGameTiles.Add((letterLocation.row, letterLocation.col, status));
+                letterResponseStatus.UncoveredGameTiles.Add(letterFoundCoord);
             }
             
             KeyboardLetterStatus keyboardLetterStatus;
@@ -288,8 +300,15 @@ public class GuessResponse
 
 public class LetterResponseStatus
 {
-    public List<(int row, int col, GameTileStatus status)> FoundCoords = [];
+    // public List<(int row, int col, GameTileStatus status)> FoundCoords = [];
+    public List<LetterFoundCoordinate> UncoveredGameTiles = [];
     public KeyboardLetterStatus KeyboardStatus;
+}
+
+public class LetterFoundCoordinate
+{
+    public Coordinate Coordinate { get; set; }
+    public GameTileStatus GameTileStatus { get; set; }
 }
 
 public enum GameTileStatus

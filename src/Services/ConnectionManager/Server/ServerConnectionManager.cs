@@ -13,12 +13,14 @@ public interface IServerConnectionListener
    public void Disconnected();
    public void Reconnecting();
    public void Reconnected();
-   public void Receive(BaseServerReceiveMessage message);
+   public void Receive(IServerReceivable message);
    public void Disconnecting();
+   void HttpResponse(string response);
 }
 
 public partial class ServerConnectionManager:Node
 {
+   private HttpRequest _httpRequest;
    private WebSocketPeer _websocketPeer;
    private WebSocketPeer.State _websocketState;
    private ServerConnectionStateMachine _stateMachine;
@@ -77,6 +79,18 @@ public partial class ServerConnectionManager:Node
       _reconnectTimer.SetWaitTime(_reconnectWaitPeriod);
       _reconnectTimer.Timeout += _reconnect;
       AddChild(_reconnectTimer);
+      
+      _httpRequest = new HttpRequest();
+      AddChild(_httpRequest);
+      _httpRequest.RequestCompleted += _httpRequestCompleted;
+   }
+
+   private void _httpRequestCompleted(long result, long responseCode, string[] headers, byte[] body)
+   {
+     if (responseCode == 200)
+     {
+        Listener.HttpResponse(body.GetStringFromUtf8());
+     }
    }
 
    private void _reconnect()
@@ -102,12 +116,12 @@ public partial class ServerConnectionManager:Node
       while (_websocketPeer.GetAvailablePacketCount() > 0)
       {
          var bytes = _websocketPeer.GetPacket();
-         GD.Print($"received --- {bytes.GetStringFromUtf8()}");
-            
-         var msg = JsonSerializer.Deserialize<BaseServerReceiveMessage>(bytes, JsonSerializerOptions);
+         var msg = JsonSerializer.Deserialize<IServerReceivable>(bytes, JsonSerializerOptions);
          Listener.Receive(msg);
       }
    }
+   
+   // private void RouteMessage()
 
    public WebSocketPeer.State State => _websocketState;
    public bool RetriedMaxTimes => _reconnectCounter > _reconnectMaxTries;
@@ -125,15 +139,9 @@ public partial class ServerConnectionManager:Node
       _websocketPeer?.Close();
    }
 
-   public Error Send(BaseServerSendMessage req)
+   public Error Send(IServerSendable req)
    {
-      var options = new JsonSerializerOptions
-         {
-             WriteIndented = false,
-             // Optional: Serialize enum as string
-             Converters = { new JsonStringEnumConverter<ServerMessageType>() }
-         };
-      var text = JsonSerializer.Serialize(req, options);
+      var text = JsonSerializer.Serialize(req);
       return _websocketPeer.SendText(text);
    }
 
@@ -148,76 +156,10 @@ public partial class ServerConnectionManager:Node
       _reconnectCounter++;
       _reconnectTimer.Start(_reconnectWaitPeriod * _reconnectCounter);
    }
+
+   public Error HttpGet(string url)
+   {
+      return _httpRequest.Request(url);
+   }
 }
 
-public enum ServerMessageType
-{
-   Matchmaking,
-   Gameplay,
-   // ... other types
-}
-
-public class BaseServerReceiveMessage
-{
-   public ServerMessageType Type { get; set; }
-   public IServerReceivable Payload { get; set; }
-}
-
-[JsonDerivedType(typeof(MatchmakingResponse), typeDiscriminator: "MatchmakingResponse")]
-[JsonDerivedType(typeof(GameplayReceiveMessage), typeDiscriminator: "GameplayMessage")] // Example for another type
-public interface IServerReceivable
-{
-}
-
-public class MatchmakingResponse : IServerReceivable
-{
-   [JsonPropertyName("user_one_name")]
-   public string UserOneName { get; set; }
-
-   [JsonPropertyName("user_two_name")]
-   public string UserTwoName { get; set; }
-   
-   [JsonPropertyName("user_one_id")]
-   public Guid UserOneId { get; set; }
-   
-   [JsonPropertyName("user_two_id")]
-   public Guid UserTwoId { get; set; }
-}
-
-public class GameplayReceiveMessage : IServerReceivable {}
-
-public class BaseServerSendMessage
-{
-   public ServerMessageType Type { get; set; }
-   public IServerSendable Payload { get; set; }
-}
-
-[JsonDerivedType(typeof(MatchmakingRequest), typeDiscriminator: "MatchmakingRequest")]
-[JsonDerivedType(typeof(GameplaySendMessage), typeDiscriminator: "GameplayMessage")] // Example for another type
-public interface IServerSendable
-{
-}
-
-public class MatchmakingRequest : IServerSendable
-{
-    public string Name { get; set; }
-    
-    public static BaseServerSendMessage New(string name)
-    {
-       var req = new MatchmakingRequest
-       {
-          Name = name,
-       };
-       return new BaseServerSendMessage
-       {
-          Type = ServerMessageType.Matchmaking,
-          Payload = req
-       };
-    }
-}
-
-public class GameplaySendMessage : IServerSendable
-{
-    public int PlayerId { get; set; }
-    public string Action { get; set; }
-}

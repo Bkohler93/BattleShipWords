@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Services.ConnectionManager;
+using BattleshipWithWords.Services.ConnectionManager.Server;
 using BattleshipWithWords.Utilities;
 using Godot;
 
@@ -40,11 +41,9 @@ public class InternetMatchmakingScene : IScene
         {
             _sceneManager.TransitionTo(new MainMenuScene(_sceneManager, _overlayManager), TransitionDirection.Backward);
         };
-        matchmaking!.OnPlayButtonPressed = () =>
+        matchmaking!.OnStartSetup = (StartSetup msg) =>
         {
-            GD.Print("have to implement MultiplayerGameManager to function with ServerConnectionManager");
-            // var gameManager = new MultiplayerGameManager(connectionManager);
-            // _sceneManager.TransitionTo(new MultiplayerSetupScene(gameManager,_sceneManager, _overlayManager), TransitionDirection.Backward);
+            _sceneManager.TransitionTo(new InternetSetupScene(msg, _sceneManager, _overlayManager), TransitionDirection.Forward);
         };
 
         _node = matchmaking;

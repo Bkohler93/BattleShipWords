@@ -16,6 +16,10 @@ public static class ResourcePaths
    public const string MultiplayerGameNodePath = $"{MultiplayerGameNodes}/multiplayer_game.tscn";
    public const string MultiplayerSetupNodePath = $"{MultiplayerGameNodes}/multiplayer_setup.tscn";
    public const string MultiplayerTurnDeciderNodePath = $"{MultiplayerGameNodes}/multiplayer_turn_decoder.tscn";
+  
+   private const string InternetGameNodes = $"{GameNodesBase}/multiplayer/internet";
+   public const string InternetSetupNodePath = $"{InternetGameNodes}/internet_setup.tscn";
+   public const string InternetTurnDeciderNodePath = $"{InternetGameNodes}/internet_turn_decider.tscn";
    
    private const string MenuNodesBase = "res://scenes/menus";
    public const string InternetMatchmakingMenuNodePath = $"{MenuNodesBase}/internet_matchmaking.tscn";
