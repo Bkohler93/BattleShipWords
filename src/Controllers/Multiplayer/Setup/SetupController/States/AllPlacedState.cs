@@ -33,11 +33,11 @@ public class AllPlacedState: SetupState
                 s += $"({coord.row},{coord.col}),";
             } 
         }
-        _controller.GameManager.LocalUpdateHandler(new UIEvent
-        {
-            Type = EventType.SetupCompleted,
-            Data = new SetupCompletedEventData(_controller.SelectedWords, _controller.BoardSelection) 
-        });
+        // _controller.GameManager.LocalUpdateHandler(new UIEvent
+        // {
+        //     Type = EventType.SetupCompleted,
+        //     Data = new SetupCompletedEventData(_controller.SelectedWords, _controller.BoardSelection) 
+        // });
     }
 
     public override void HandleNextWordsButton()

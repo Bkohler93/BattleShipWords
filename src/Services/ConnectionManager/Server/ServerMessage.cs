@@ -1,6 +1,7 @@
+using System;
 using System.Text.Json.Serialization;
 using BattleshipWithWords.Controllers.Multiplayer.Internet;
-using BattleshipWithWords.Controllers.Multiplayer.Internet.TurnDecider;
+using BattleshipWithWords.Controllers.Multiplayer.Internet.Gameplay;
 
 namespace BattleshipWithWords.Services.ConnectionManager.Server;
 
@@ -20,7 +21,10 @@ public enum ServerMessageType
 [JsonDerivedType(typeof(StartSetup), typeDiscriminator: "StartSetup")]
 [JsonDerivedType(typeof(StartOrderDecider), typeDiscriminator: "StartOrderDecider")]
 [JsonDerivedType(typeof(SetupOpponentDone), typeDiscriminator: "SetupOpponentDone")]
-[JsonDerivedType(typeof(UIUpdateMessage), typeDiscriminator: "UIUpdateMessage")]
+[JsonDerivedType(typeof(TurnDeciderUIUpdateMessage), typeDiscriminator: "TurnDeciderUIUpdate")]
+[JsonDerivedType(typeof(GameplayUIUpdateMessage), typeDiscriminator: "GameplayUIUpdate")]
+[JsonDerivedType(typeof(PlayerQuit), typeDiscriminator: "PlayerQuit")]
+
 public interface IServerReceivable
 {
 }
@@ -62,7 +66,15 @@ public class AuthenticatedMessage : IServerReceivable
    [JsonPropertyName("user_id")] public string UserId { get; set; }
 }
 
-
+// Tell the source generator what types you want metadata for
+[JsonSourceGenerationOptions(
+   WriteIndented = false,
+   PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+[JsonSerializable(typeof(IServerSendable))]
+[JsonSerializable(typeof(IServerReceivable))]
+internal partial class SerializationContext : JsonSerializerContext
+{
+}
 
 [JsonDerivedType(typeof(ConnectingMessage), typeDiscriminator: "ConnectingMessage")]
 [JsonDerivedType(typeof(RequestMatchmaking), typeDiscriminator: "RequestMatchmaking")]
@@ -70,12 +82,12 @@ public class AuthenticatedMessage : IServerReceivable
 [JsonDerivedType(typeof(ConfirmMatch), typeDiscriminator: "ConfirmMatch")]
 [JsonDerivedType(typeof(SetupPlacementAttempt), typeDiscriminator: "SetupPlacementAttempt")]
 [JsonDerivedType(typeof(SetupFinalize), typeDiscriminator: "SetupFinalize")]
-[JsonDerivedType(typeof(UIEventMessage), typeDiscriminator: "UIEventMessage")]
+[JsonDerivedType(typeof(TurnDeciderUIEventMessage), typeDiscriminator: "TurnDeciderUIEventMessage")]
+[JsonDerivedType(typeof(GameplayUIEventMessage), typeDiscriminator: "GameplayUIEventMessage")]
 // [JsonDerivedType(typeof(SetupUndo), typeDiscriminator: "SetupUndo")]
 // [JsonDerivedType(typeof(SetupFinalize), typeDiscriminator: "SetupFinalize")]
 public interface IServerSendable
 {
-   
 }
 
 public class ConfirmMatch : IServerSendable

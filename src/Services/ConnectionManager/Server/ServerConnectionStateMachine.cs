@@ -112,7 +112,6 @@ public class ConnectedState(ServerConnectionStateMachine stateMachine, ServerCon
                 ThrowStateException(newState);
                 break;
             case WebSocketPeer.State.Open:
-                ThrowStateException(newState);
                 break;
             case WebSocketPeer.State.Closing:
                 StateMachine.TransitionTo(new DisconnectingState(StateMachine, manager));

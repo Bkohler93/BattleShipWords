@@ -1,21 +1,33 @@
 [gd_scene load_steps=3 format=3 uid="uid://dq6yyn0lbt05n"]
 
-[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_8yp57"]
 [ext_resource type="Script" uid="uid://rvc4t580d8gd" path="res://src/Nodes/AppRoot.cs" id="2_8yp57"]
+[ext_resource type="Script" uid="uid://dsg4usl0f7ixh" path="res://src/Nodes/SafeAreaManager.cs" id="2_ek6nt"]
 
-[node name="AppRoot" type="Control"]
+[node name="AppRoot" type="Control" node_paths=PackedStringArray("_backgroundRoot", "_gameRoot", "_uiRoot", "_popupRoot")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("1_8yp57")
 script = ExtResource("2_8yp57")
+_backgroundRoot = NodePath("Background Layer/BackgroundRoot")
+_gameRoot = NodePath("GameLayer/GameRoot")
+_uiRoot = NodePath("UILayer/UIRoot")
+_popupRoot = NodePath("PopupLayer/PopupRoot")
 
-[node name="SceneRoot" type="Node" parent="."]
+[node name="Background Layer" type="CanvasLayer" parent="."]
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="BackgroundRoot" type="Control" parent="Background Layer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="Background Layer/BackgroundRoot"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,4 +36,41 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.164706, 0.270588, 0.313726, 1)
 
-[node name="UIRoot" type="CanvasLayer" parent="."]
+[node name="GameLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="GameRoot" type="Control" parent="GameLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_ek6nt")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="UIRoot" type="Control" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_ek6nt")
+
+[node name="PopupLayer" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="PopupRoot" type="Control" parent="PopupLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_ek6nt")

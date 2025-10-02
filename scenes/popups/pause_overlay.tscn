@@ -1,0 +1,88 @@
+[gd_scene load_steps=5 format=3 uid="uid://brnwiyh0ebf13"]
+
+[ext_resource type="Script" uid="uid://cs68yse7g4501" path="res://src/Nodes/Overlays/PauseMenu.cs" id="1_58qqw"]
+[ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="2_qoxtj"]
+[ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="3_a8na6"]
+[ext_resource type="StyleBox" uid="uid://br3x1whpudve8" path="res://themes/overlay_menu.tres" id="4_gsoyh"]
+
+[node name="Pause" type="Control" node_paths=PackedStringArray("_continueButton", "_quitButton", "_pausePanel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_58qqw")
+_continueButton = NodePath("VBoxContainer/Control2/PausePanel/VBoxContainer/VBoxContainer/Button")
+_quitButton = NodePath("VBoxContainer/Control2/PausePanel/VBoxContainer/VBoxContainer/Button2")
+_pausePanel = NodePath("VBoxContainer/Control2/PausePanel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
+
+[node name="PauseButton" type="Button" parent="VBoxContainer/Control/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_qoxtj")
+theme_override_fonts/font = ExtResource("3_a8na6")
+theme_override_font_sizes/font_size = 32
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PausePanel" type="PanelContainer" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("4_gsoyh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control2/PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/Control2/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Pause"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control2/PausePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Button" type="Button" parent="VBoxContainer/Control2/PausePanel/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_qoxtj")
+theme_override_font_sizes/font_size = 36
+text = "Continue"
+
+[node name="Button2" type="Button" parent="VBoxContainer/Control2/PausePanel/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_qoxtj")
+theme_override_font_sizes/font_size = 36
+text = "Quit"

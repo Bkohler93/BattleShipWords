@@ -7,6 +7,7 @@ using BattleshipWithWords.Controllers.Multiplayer.Internet.Matchmaking;
 using BattleshipWithWords.Nodes.Globals;
 using BattleshipWithWords.Services.ConnectionManager;
 using BattleshipWithWords.Services.ConnectionManager.Server;
+using BattleshipWithWords.Utilities;
 
 public partial class InternetMatchmaking : Control
 {
@@ -26,11 +27,12 @@ public partial class InternetMatchmaking : Control
     public Action<StartSetup> OnStartSetup;
     private InternetMatchmakingController _controller;
     private ServerConnectionManager _connectionManager;
+    
 
     public override void _Ready()
     {
-        _connectionManager = new ServerConnectionManager();
-        AddChild(_connectionManager);
+        _connectionManager = AppRoot.Services.InitializeService<ServerConnectionManager>();
+        Logger.Print($"connectionManager parent ={_connectionManager.GetParent().Name}"); 
         _controller = new InternetMatchmakingController(this, _connectionManager);
         
         _playButton.Hide();
@@ -38,6 +40,7 @@ public partial class InternetMatchmaking : Control
         {
             _controller.OnCancelButtonPressed();
             OnCancelButtonPressed?.Invoke();
+            AppRoot.Services.StopService<ServerConnectionManager>();
         };
         _playButton.Pressed += () =>
         {

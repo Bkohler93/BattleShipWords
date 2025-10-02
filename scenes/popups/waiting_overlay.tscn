@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=3 uid="uid://bv4lc0crpiy52"]
+
+[ext_resource type="Script" uid="uid://62lu5scqidqf" path="res://src/Nodes/Overlays/Waiting.cs" id="1_ufvtv"]
+[ext_resource type="StyleBox" uid="uid://br3x1whpudve8" path="res://themes/overlay_menu.tres" id="2_11uks"]
+
+[node name="Waiting" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_ufvtv")
+
+[node name="Control2" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_11uks")
+
+[node name="Label" type="Label" parent="Control2/Panel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Waiting on other player"
+horizontal_alignment = 1

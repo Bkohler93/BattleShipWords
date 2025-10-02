@@ -36,7 +36,8 @@ public class AllPlacedState: SetupState
             UserId = _controller.SetupNode.Auth.UserId
         });
         Logger.Print("sent SetupFinalize message");
-        _controller.OverlayManager.Add("waiting", new WaitingOverlay(), 2);
+        _controller.SetupNode.OnLocalSetupComplete?.Invoke();
+        // _controller.OverlayManager.Add("waiting", new WaitingOverlay(), 2);
         // _controller.GameManager.LocalUpdateHandler(new UIEvent
         // {
         //     Type = EventType.SetupCompleted,
@@ -89,11 +90,11 @@ public class AllPlacedState: SetupState
         switch (message)
         {
             case StartOrderDecider msg:
-                _controller.OverlayManager.Remove("waiting");
-                Logger.Print($"time to transition into Order Decider.");
+                // _controller.OverlayManager.Remove("waiting");
+                _controller.SetupNode.OnSetupComplete?.Invoke();
                 break;
             default:
-                Logger.Print("Unknown message type during AllPlacedState");
+                Logger.Print($"Unknown message type during AllPlacedState - {message.GetType().Name}");
                 break;
         }
     }

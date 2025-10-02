@@ -1,5 +1,7 @@
+using BattleshipWithWords.Controllers.Multiplayer.Internet.Gameplay;
 using BattleshipWithWords.Services.ConnectionManager;
 using BattleshipWithWords.Services.ConnectionManager.Server;
+using BattleshipWithWords.Utilities;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Internet.Matchmaking;
@@ -37,12 +39,6 @@ public class MatchmadeState: InternetMatchmakingState, IServerConnectionListener
 
     public override void OnCancelButtonPressed()
     {
-        //TODO this should not send an ExitMatchmaking but an ExitGame message
-        _controller.Send(new ExitMatchmaking
-        {
-            UserId = _controller.Node.Auth.UserId,
-            UserSkill = 100
-        });
         _controller.CloseConnection();
     }
 
@@ -78,9 +74,10 @@ public class MatchmadeState: InternetMatchmakingState, IServerConnectionListener
 
     public override void Receive(IServerReceivable message)
     {
+        Logger.Print($"received message - {message}");
         switch (message)
         {
-            case PlayerLeftRoom msg:
+            case PlayerQuit msg:
                 GD.Print("received player left room");
                 //TODO if opponent leaves return back to matchmaking.
                 _controller.TransitionTo(new MatchmakingState(_controller));

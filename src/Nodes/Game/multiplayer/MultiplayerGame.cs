@@ -2,11 +2,12 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using androidplugintest.ConnectionManager;
+using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Controllers.Multiplayer.Game;
 using BattleshipWithWords.Controllers.SceneManager;
 using BattleshipWithWords.Utilities;
 
-public partial class MultiplayerGame : Control, ISharedNodeReceiver
+public partial class MultiplayerGame : Control 
 {
     private List<Node> _nodesToKeepAlive = [];
     private Gameboard _playerOneGameboard;
@@ -29,7 +30,7 @@ public partial class MultiplayerGame : Control, ISharedNodeReceiver
         _playerOneGameboard.IsControlledLocally = true;
         _playerTwoGameboard.IsControlledLocally = false;
 
-        _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
+        // _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
         _multiplayerGameManager.LocalUIUpdated += _playerOneGameboard.UIUpdatedHandler;
         _multiplayerGameManager.OpponentUIUpdated += _playerTwoGameboard.UIUpdatedHandler;
         
@@ -51,13 +52,14 @@ public partial class MultiplayerGame : Control, ISharedNodeReceiver
 
     public override void _ExitTree()
     {
-        _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
+        // _playerOneGameboard.LocalUpdateMade += _multiplayerGameManager.LocalUpdateHandler;
         _multiplayerGameManager.LocalUIUpdated += _playerOneGameboard.UIUpdatedHandler;
         _multiplayerGameManager.OpponentUIUpdated += _playerTwoGameboard.UIUpdatedHandler;
     }
 
     public override void _Ready()
     {
+        
         _playerTwoGameboard.GameboardTitle = "Opponent's Board";
         _playerOneGameboard.GameboardTitle = "Your Board";
         _playerTwoGameboard.InitialRotation = (float)Math.PI;

@@ -1,0 +1,85 @@
+[gd_scene load_steps=5 format=3 uid="uid://brhgwvtfqid7g"]
+
+[ext_resource type="Script" uid="uid://cnrvq5l2ex6w5" path="res://src/Nodes/Overlays/GameOverlay.cs" id="1_ufij1"]
+[ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="2_4cu78"]
+[ext_resource type="PackedScene" uid="uid://d2w4wo1swim3e" path="res://scenes/components/avatar.tscn" id="2_6crrf"]
+[ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="3_brw1k"]
+
+[node name="Game" type="Control" node_paths=PackedStringArray("_pauseButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_ufij1")
+_playerAvatarNodePath = NodePath("VBoxContainer/Control3/HBoxContainer/PlayerAvatar")
+_opponentAvatarNodePath = NodePath("VBoxContainer/Control3/HBoxContainer/OpponentAvatar")
+_pauseButton = NodePath("VBoxContainer/Control/HBoxContainer/PauseButton")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
+
+[node name="PauseButton" type="Button" parent="VBoxContainer/Control/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_4cu78")
+theme_override_fonts/font = ExtResource("3_brw1k")
+theme_override_font_sizes/font_size = 32
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Control3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="PlayerAvatar" parent="VBoxContainer/Control3/HBoxContainer" instance=ExtResource("2_6crrf")]
+layout_mode = 2
+size_flags_stretch_ratio = 0.2
+
+[node name="Control2" type="Control" parent="VBoxContainer/Control3/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.6
+mouse_filter = 2
+
+[node name="OpponentAvatar" parent="VBoxContainer/Control3/HBoxContainer" instance=ExtResource("2_6crrf")]
+layout_mode = 2
+size_flags_stretch_ratio = 0.2
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.8
+mouse_filter = 2

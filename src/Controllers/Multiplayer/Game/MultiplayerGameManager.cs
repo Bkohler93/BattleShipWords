@@ -29,8 +29,8 @@ public class MultiplayerGameManager
     public event Action<UIUpdate> OpponentUIUpdated;
     public event Action<UIUpdate> LocalUIUpdated;
     public event Action BothSetupsCompleted;
-    public event Action<WordGuessedResponseData> GuessResultReceived;
-    public event Action<UncoveredTileResponse> TileUncoverResultReceived;
+    public event Action<TurnTakenUpdate> GuessResultReceived;
+    // public event Action<UncoveredTileResponse> TileUncoverResultReceived;
     public event Action GameWon;
     public event Action GameLost;
     public event MultiplayerApi.PeerDisconnectedEventHandler PeerDisconnected;
@@ -154,7 +154,7 @@ public class MultiplayerGameManager
             Data = new PlayingEventData()
             {
                 Type = EventType.KeyPressed,
-                Data = new EventKeyPressedData()
+                Data = new KeyPressedEvent()
                 {
                   Key = key,  
                 },
@@ -164,7 +164,7 @@ public class MultiplayerGameManager
         // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
-    public void LocalUpdateHandler(UIEvent @event)
+    public void LocalUpdateHandler(IUIEvent @event)
     {
         _stateMachine.ProcessLocalUpdate(@event);
     }
@@ -198,10 +198,10 @@ public class MultiplayerGameManager
         // if (!res.DoesPlayerGoAgain)
         //     _stateMachine.TransitionTo(new PlayingState(_stateMachine, this));
 
-        var data = new WordGuessedResponseData()
+        var data = new TurnTakenUpdate()
         {
-            Result = res.Result,
-            ResponseLetters = res.ResponseLetters,
+            // Result = res.Result,
+            LetterGameStatuses = res.ResponseLetters,
             WordLetterStatus = res.WordLetterStatus,
         };
         
@@ -215,45 +215,45 @@ public class MultiplayerGameManager
             }
         });
         
-        OpponentUIUpdated?.Invoke(new UIUpdate
-        {
-            Type = UIUpdateType.GuessedWord,
-            Data = data, 
-        });
+        // // OpponentUIUpdated?.Invoke(new UIUpdate
+        // // {
+        // //     Type = UIUpdateType.GuessedWord,
+        // //     Data = data, 
+        // });
         // OpponentGuessed?.Invoke(data);
         _connectionManager.Send(msg);
         // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
-    public void UpdateLocalGameFromWordGuess(WordGuessedResponseData data)
+    public void UpdateLocalGameFromWordGuess(TurnTakenUpdate data)
     {
-        switch (data.Result)
-        {
-            case TurnResult.GoAgain:
-                break;
-            case TurnResult.Win:
-                _stateMachine.TransitionTo(new GameOverState(_stateMachine, this, true));
-                break;
-            case TurnResult.TurnOver:
-                _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        // switch (data.Result)
+        // {
+        //     case TurnResult.GoAgain:
+        //         break;
+        //     case TurnResult.Win:
+        //         _stateMachine.TransitionTo(new GameOverState(_stateMachine, this, true));
+        //         break;
+        //     case TurnResult.TurnOver:
+        //         _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
+        //         break;
+        //     default:
+        //         throw new ArgumentOutOfRangeException();
+        // }
         
         // if (!data.DoesPlayerGoAgain) 
         //    _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
         ;
-        UpdateLocalUI(new UIUpdate
-        {
-            Type = UIUpdateType.GuessedWord,
-            Data =new WordGuessedResponseData() 
-            {
-                Result = TurnResult.GoAgain,
-                ResponseLetters = null,
-                WordLetterStatus = null
-            }
-        });
+        // UpdateLocalUI(new UIUpdate
+        // {
+        //     Type = UIUpdateType.GuessedWord,
+        //     Data =new TurnTakenResponse() 
+        //     {
+        //         Result = TurnResult.GoAgain,
+        //         ResponseLetters = null,
+        //         WordLetterStatus = null
+        //     }
+        // });
         GuessResultReceived?.Invoke(data);
     }
 
@@ -263,23 +263,23 @@ public class MultiplayerGameManager
         // RpcId(_peerId, nameof(Rpc_Send), msg.Serialize());
     }
 
-    public void UpdateLocalFromUncoverTile(UncoveredTileResponse uncoverTileData)
-    {
-        switch (uncoverTileData.Result)
-        {
-            case TurnResult.GoAgain:
-                break;
-            case TurnResult.Win:
-                _stateMachine.TransitionTo(new GameOverState(_stateMachine, this, true));
-                break;
-            case TurnResult.TurnOver:
-                _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        TileUncoverResultReceived?.Invoke(uncoverTileData);
-    }
+    // public void UpdateLocalFromUncoverTile(UncoveredTileResponse uncoverTileData)
+    // {
+    //     switch (uncoverTileData.Result)
+    //     {
+    //         case TurnResult.GoAgain:
+    //             break;
+    //         case TurnResult.Win:
+    //             _stateMachine.TransitionTo(new GameOverState(_stateMachine, this, true));
+    //             break;
+    //         case TurnResult.TurnOver:
+    //             _stateMachine.TransitionTo(new OpponentPlayingState(this, _stateMachine));
+    //             break;
+    //         default:
+    //             throw new ArgumentOutOfRangeException();
+    //     }
+    //     TileUncoverResultReceived?.Invoke(uncoverTileData);
+    // }
 
     public void OnWin()
     {

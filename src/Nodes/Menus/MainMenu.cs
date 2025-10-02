@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using BattleshipWithWords.Controllers;
 using BattleshipWithWords.Services;
+using BattleshipWithWords.Utilities;
 
 public partial class MainMenu : Control
 {
@@ -25,12 +26,14 @@ public partial class MainMenu : Control
     
     public override void _Ready()
     {
+        Logger.Print("main menu ready");
         _singlePlayerButton.Pressed += OnSinglePlayerButtonPressed;
         _multiplayerButton.Pressed += OnMultiplayerButtonPressed;
         _settingsButton.Pressed += OnSettingsButtonPressed;
         _quitButton.Pressed += OnQuitButtonPressed;
     }
-
+    
+    
     public override void _ExitTree()
     {
     }

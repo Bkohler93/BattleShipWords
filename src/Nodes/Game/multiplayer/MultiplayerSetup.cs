@@ -9,7 +9,7 @@ using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Utilities;
 using Godot;
 
-public partial class MultiplayerSetup : MarginContainer, ISharedNodeReceiver
+public partial class MultiplayerSetup : MarginContainer 
 {
     private List<Node> _nodesToKeepAlive = [];
     private float _separationGap = 40f/6f; 

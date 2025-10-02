@@ -1,6 +1,8 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using BattleshipWithWords.Controllers.Multiplayer.Game;
+using BattleshipWithWords.Utilities;
 using Godot;
 
 namespace BattleshipWithWords.Services.ConnectionManager.Server;
@@ -116,7 +118,11 @@ public partial class ServerConnectionManager:Node
       while (_websocketPeer.GetAvailablePacketCount() > 0)
       {
          var bytes = _websocketPeer.GetPacket();
-         var msg = JsonSerializer.Deserialize<IServerReceivable>(bytes, JsonSerializerOptions);
+         // var msg = JsonSerializer.Deserialize<IServerReceivable>(bytes, JsonSerializerOptions);
+         var msg = JsonSerializer.Deserialize<IServerReceivable>(
+            bytes,
+            SerializationContext.Default.IServerReceivable
+         );
          Listener.Receive(msg);
       }
    }
@@ -141,7 +147,11 @@ public partial class ServerConnectionManager:Node
 
    public Error Send(IServerSendable req)
    {
-      var text = JsonSerializer.Serialize(req);
+      // var text = JsonSerializer.Serialize(req);
+      var text = JsonSerializer.Serialize<IServerSendable>(
+         req,
+         SerializationContext.Default.IServerSendable
+      );
       return _websocketPeer.SendText(text);
    }
 

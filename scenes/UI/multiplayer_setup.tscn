@@ -1,0 +1,194 @@
+[gd_scene load_steps=11 format=3 uid="uid://cxeoo56cntwt0"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_n0dkq"]
+[ext_resource type="Script" uid="uid://cu2ixgbxdujeq" path="res://src/Nodes/Game/multiplayer/MultiplayerSetup.cs" id="2_d2wgg"]
+[ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="3_osrae"]
+[ext_resource type="FontFile" uid="uid://bnivyrmj3jm6p" path="res://assets/fonts/Font Awesome 6 Free-Solid-900.otf" id="4_axuf2"]
+[ext_resource type="FontFile" uid="uid://dcxqd8p316xs7" path="res://assets/fonts/Font Awesome 6 Free-Regular-400.otf" id="5_14nao"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebx8l"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kmiug"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_61ecb"]
+bg_color = Color(0.164706, 0.270588, 0.313726, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_51qsn"]
+bg_color = Color(0.164706, 0.270588, 0.313726, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_85h8h"]
+bg_color = Color(0.0771265, 0.142076, 0.168494, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.972549, 0.2, 0.235294, 1)
+
+[node name="MultiplayerSetup" type="Control" node_paths=PackedStringArray("_gridContainer", "ConfirmButton", "NextWordsButton", "PreviousWordsButton", "ThreeLetterWordButton", "FourLetterWordButton", "FiveLetterWordButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_n0dkq")
+script = ExtResource("2_d2wgg")
+_gridContainer = NodePath("VBoxContainer/Control2/GridContainer")
+ConfirmButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer/Button3")
+NextWordsButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer/HboxContainer2/Button2")
+PreviousWordsButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer/HboxContainer2/Button")
+ThreeLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/ThreeLetterButton")
+FourLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/FourLetterButton")
+FiveLetterWordButton = NodePath("VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer/FiveLetterButton")
+_idleStyleBox = SubResource("StyleBoxFlat_ebx8l")
+_pendingStyleBox = SubResource("StyleBoxFlat_kmiug")
+_placeableStyleBox = SubResource("StyleBoxFlat_61ecb")
+_placedStyleBox = SubResource("StyleBoxFlat_51qsn")
+_pendingFailedStyleBox = SubResource("StyleBoxFlat_85h8h")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.2
+
+[node name="Label" type="Label" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 36
+text = "Setup your opponent's board"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.4
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 6
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer/Control3/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control3/VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ThreeLetterButton" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_osrae")
+theme_override_font_sizes/font_size = 48
+
+[node name="FourLetterButton" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_osrae")
+theme_override_font_sizes/font_size = 48
+
+[node name="FiveLetterButton" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_osrae")
+theme_override_font_sizes/font_size = 48
+
+[node name="Control2" type="Control" parent="VBoxContainer/Control3/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Control3/VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 64
+alignment = 1
+
+[node name="HboxContainer2" type="HBoxContainer" parent="VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Button" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer/HboxContainer2"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_osrae")
+theme_override_fonts/font = ExtResource("4_axuf2")
+theme_override_font_sizes/font_size = 72
+
+[node name="Button2" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer/HboxContainer2"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_osrae")
+theme_override_fonts/font = ExtResource("4_axuf2")
+theme_override_font_sizes/font_size = 72
+
+[node name="Button3" type="Button" parent="VBoxContainer/Control3/VBoxContainer/Control2/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_osrae")
+theme_override_fonts/font = ExtResource("5_14nao")
+theme_override_font_sizes/font_size = 72

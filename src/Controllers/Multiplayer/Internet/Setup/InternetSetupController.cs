@@ -12,7 +12,7 @@ public class SetupController : ISetupTileEventHandler
     public ServerConnectionManager ServerConnectionManager;
     public SetupState CurrentState;
     public readonly InternetSetup SetupNode;
-    public OverlayManager OverlayManager;
+    // public OverlayManager OverlayManager;
 
     public readonly List<List<SetupTile>> Board = [];
 
@@ -36,10 +36,10 @@ public class SetupController : ISetupTileEventHandler
     // public bool IsFiveLetterWordPlaced;
     public Dictionary<int, bool> IsWordPlaced = new();
 
-    public SetupController(InternetSetup setupNode, ServerConnectionManager connectionManager, OverlayManager overlayManager,
+    public SetupController(InternetSetup setupNode, ServerConnectionManager connectionManager,
         StartSetup startSetupData)
     {
-        OverlayManager = overlayManager;
+        // OverlayManager = overlayManager;
         BoardSelection[3] = [];
         BoardSelection[4] = [];
         BoardSelection[5] = [];

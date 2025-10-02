@@ -1,6 +1,5 @@
 using Godot;
-using System;
 
-public partial class Waiting : CanvasLayer
+public partial class Waiting :Control 
 {
 }

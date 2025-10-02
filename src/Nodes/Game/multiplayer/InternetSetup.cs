@@ -7,22 +7,23 @@ using BattleshipWithWords.Controllers.SceneManager;
 using BattleshipWithWords.Networkutils;
 using BattleshipWithWords.Nodes.Globals;
 using BattleshipWithWords.Services.ConnectionManager.Server;
+using BattleshipWithWords.Services.SharedData;
 using BattleshipWithWords.Utilities;
 using Godot;
 
-public partial class InternetSetup : MarginContainer, ISharedNodeReceiver
+public partial class InternetSetup : Control 
 {
     private float _separationGap = 40f/6f; 
     
     [Export] private GridContainer _gridContainer;
 
     private SetupController _controller;
-    private OverlayManager _overlayManager;
+    // private OverlayManager _overlayManager;
     private ServerConnectionManager _serverConnectionManager;
-    private StartSetup _startSetupData;
     
     public Auth Auth => GetNode<Auth>("/root/Auth");
     public Action OnSetupComplete { get; set; }
+    public Action OnLocalSetupComplete { get; set; }
 
     [Export] public Button ConfirmButton;
 
@@ -48,14 +49,14 @@ public partial class InternetSetup : MarginContainer, ISharedNodeReceiver
     public readonly Dictionary<int, Button> NextWordButtons = new();
     public readonly Dictionary<int, Button> PreviousWordButtons = new();
 
-    public void Init(StartSetup startSetupData, OverlayManager overlayManager)
-    {
-        _startSetupData = startSetupData; 
-        _overlayManager = overlayManager;
-    }
+    // public void Init(OverlayManager overlayManager)
+    // {
+    //     _overlayManager = overlayManager;
+    // }
     
     public override void _Ready()
     {
+        _serverConnectionManager = AppRoot.Services.RetrieveService<ServerConnectionManager>();
         WordButtons[3] = _threeLetterWordButton;
         WordButtons[4] = _fourLetterWordButton;
         WordButtons[5] = _fiveLetterWordButton;
@@ -68,7 +69,9 @@ public partial class InternetSetup : MarginContainer, ISharedNodeReceiver
         PreviousWordButtons[4] = _prevFourLetterWordButton;
         PreviousWordButtons[5] = _prevFiveLetterWordButton;
         
-        _controller = new SetupController(this, _serverConnectionManager, _overlayManager, _startSetupData);
+        var startSetupData = AppRoot.Services.RetrieveService<SharedData>().Consume<StartSetup>(); 
+        
+        _controller = new SetupController(this, _serverConnectionManager, startSetupData);
         _initializeBoard();
         _initializeUI();
 
@@ -166,20 +169,20 @@ public partial class InternetSetup : MarginContainer, ISharedNodeReceiver
         }
     }
 
-    public Result ReceiveSharedNodes(Node node)
-    {
-        GD.Print("MultiplayerSetup:ReceiveSharedNodes()---");
-        _serverConnectionManager = GodotNodeTree.FindFirstNodeOfType<ServerConnectionManager>(node);
-        var allReceived = false;
-        
-        if (_serverConnectionManager != null) // add more null checks if new nodes that should be received from another scene are added here
-        {
-            node.RemoveChild(_serverConnectionManager);
-            AddChild(_serverConnectionManager);
-            GD.Print($"MultiplayerSetup:ReceiveSharedNodes()--- added serverConnectionManager to {GetType().Name}");
-            allReceived = true;
-        }
-
-        return allReceived ? Result.Ok() : Result.Fail("did not receive shared nodes");
-    }
+    // public Result ReceiveSharedNodes(Node node)
+    // {
+    //     GD.Print("MultiplayerSetup:ReceiveSharedNodes()---");
+    //     _serverConnectionManager = GodotNodeTree.FindFirstNodeOfType<ServerConnectionManager>(node);
+    //     var allReceived = false;
+    //     
+    //     if (_serverConnectionManager != null) // add more null checks if new nodes that should be received from another scene are added here
+    //     {
+    //         node.RemoveChild(_serverConnectionManager);
+    //         AddChild(_serverConnectionManager);
+    //         GD.Print($"MultiplayerSetup:ReceiveSharedNodes()--- added serverConnectionManager to {GetType().Name}");
+    //         allReceived = true;
+    //     }
+    //
+    //     return allReceived ? Result.Ok() : Result.Fail("did not receive shared nodes");
+    // }
 }

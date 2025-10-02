@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmay3uorl04gx"]
+
+[ext_resource type="Script" uid="uid://hu4gae58r52f" path="res://src/Nodes/Game/multiplayer/InternetGame.cs" id="1_n6f75"]
+
+[node name="MultiplayerTurnDecider" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_n6f75")

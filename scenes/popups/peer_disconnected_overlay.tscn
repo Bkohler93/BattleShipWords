@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://dk0r5wnbrur6n"]
+
+[ext_resource type="Script" uid="uid://gqweslhkdcvt" path="res://src/Nodes/Overlays/PeerDisconnected.cs" id="1_xl75i"]
+[ext_resource type="StyleBox" uid="uid://br3x1whpudve8" path="res://themes/overlay_menu.tres" id="2_m1ilm"]
+[ext_resource type="Theme" uid="uid://cp1bs7l5g863" path="res://themes/game/setup_btn.tres" id="3_ug6p8"]
+
+[node name="PeerDisconnected" type="CanvasLayer" node_paths=PackedStringArray("_returnToMenuButton")]
+script = ExtResource("1_xl75i")
+_returnToMenuButton = NodePath("Control2/Panel/VBoxContainer/Button")
+
+[node name="Control2" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_m1ilm")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control2/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 36
+
+[node name="Label" type="Label" parent="Control2/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Peer Disconnected"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="Control2/Panel/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_ug6p8")
+theme_override_font_sizes/font_size = 32
+text = "Return to menu"

@@ -1,0 +1,167 @@
+[gd_scene load_steps=8 format=3 uid="uid://dujsg5htcl8ut"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_djpta"]
+[ext_resource type="Script" uid="uid://b3vvuh8a0ui2m" path="res://src/Nodes/Menus/LocalMatchmaking.cs" id="2_hid04"]
+
+[sub_resource type="Theme" id="Theme_a1au5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_etamx"]
+content_margin_left = 48.0
+content_margin_top = 16.0
+content_margin_right = 48.0
+content_margin_bottom = 16.0
+bg_color = Color(0.0784314, 0.8, 0.368627, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uo45u"]
+content_margin_left = 48.0
+content_margin_top = 16.0
+content_margin_right = 48.0
+content_margin_bottom = 16.0
+bg_color = Color(0.0784314, 0.8, 0.368627, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_size = 3
+shadow_offset = Vector2(1, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2otk"]
+content_margin_left = 48.0
+content_margin_top = 16.0
+content_margin_right = 48.0
+content_margin_bottom = 16.0
+bg_color = Color(0.0338468, 0.426956, 0.186025, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="Theme" id="Theme_kvkvu"]
+Button/colors/font_color = Color(0.164706, 0.270588, 0.313726, 1)
+Button/font_sizes/font_size = 48
+Button/styles/hover = SubResource("StyleBoxFlat_etamx")
+Button/styles/normal = SubResource("StyleBoxFlat_uo45u")
+Button/styles/pressed = SubResource("StyleBoxFlat_d2otk")
+
+[node name="LocalMatchmaking" type="Control" node_paths=PackedStringArray("BackButton", "ActionButton", "StatusLabel", "DiscoveredPeers", "PeerLabel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_djpta")
+script = ExtResource("2_hid04")
+BackButton = NodePath("VBoxContainer/Control3/BackButton")
+ActionButton = NodePath("VBoxContainer/Control2/VBoxContainer/ActionButton")
+StatusLabel = NodePath("VBoxContainer/Control/VBoxContainer/StatusLabel")
+DiscoveredPeers = NodePath("VBoxContainer/Control2/VBoxContainer/Control/DiscoveredPeers")
+PeerLabel = NodePath("VBoxContainer/Control2/VBoxContainer/Control/PeerLabel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control4" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -265.5
+offset_right = 265.5
+offset_bottom = 175.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Local Multiplayer"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Select an option to connect"
+horizontal_alignment = 1
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer/Control2/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PeerLabel" type="Label" parent="VBoxContainer/Control2/VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DiscoveredPeers" type="ItemList" parent="VBoxContainer/Control2/VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme = SubResource("Theme_a1au5")
+allow_search = false
+
+[node name="ActionButton" type="Button" parent="VBoxContainer/Control2/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("1_djpta")
+text = "Join"
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="VBoxContainer/Control3"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -27.5
+offset_top = -17.0
+offset_right = 27.5
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_kvkvu")
+text = "Back"

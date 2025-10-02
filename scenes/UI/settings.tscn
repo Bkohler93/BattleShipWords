@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3 uid="uid://x5powlsydw4s"]
+
+[ext_resource type="Theme" uid="uid://b66osck3icubf" path="res://themes/theme.tres" id="1_32w1k"]
+[ext_resource type="Script" uid="uid://cdq777bonnjua" path="res://src/Nodes/Menus/Settings.cs" id="2_emn88"]
+
+[node name="Settings" type="Control" node_paths=PackedStringArray("_backButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_32w1k")
+script = ExtResource("2_emn88")
+_backButton = NodePath("VBoxContainer/Control4/BackButton")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -124.0
+offset_right = 124.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 64
+text = "Settings"
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control4" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="VBoxContainer/Control4"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -27.5
+offset_top = -17.0
+offset_right = 27.5
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Back"

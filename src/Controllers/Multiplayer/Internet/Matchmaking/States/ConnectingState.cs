@@ -1,6 +1,7 @@
 using System;
 using BattleshipWithWords.Nodes.Globals;
 using BattleshipWithWords.Services.ConnectionManager.Server;
+using BattleshipWithWords.Utilities;
 using Godot;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Internet.Matchmaking;
@@ -17,7 +18,7 @@ public class ConnectingState : InternetMatchmakingState, IServerConnectionListen
 
     public override void Enter()
     {
-        var res = _controller.GetRequest("http://192.168.0.13:8080/auth/guest");
+        var res = _controller.GetRequest(ServerConfig.GetServer("AuthServer")+"/guest");
         if (res.Success) return;
         GD.Print("Failed to connect to the Internet matchmaking server");
         _controller.Node.SetInfo("Could not connect to server");
@@ -87,7 +88,9 @@ public class ConnectingState : InternetMatchmakingState, IServerConnectionListen
     public override void HttpResponse(string response)
     {
         _jwtString = response;
-        var res = _controller.Connect("ws://192.168.0.13:8089/ws", TlsOptions.ClientUnsafe());
+        Logger.Print($"got response {_jwtString}");
+        Result res;
+        res = _controller.Connect(ServerConfig.GetServer("WebsocketServer") +"/ws", ServerConfig.Environment == "Production" ? TlsOptions.Client() : TlsOptions.ClientUnsafe());
         if (res.Success) return;
         GD.Print("Failed to connect to the Internet matchmaking server");
         _controller.Node.SetInfo("Could not connect to server");

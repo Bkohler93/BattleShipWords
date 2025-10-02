@@ -8,15 +8,23 @@ using Godot.Collections;
 
 namespace BattleshipWithWords.Controllers.Multiplayer.Game;
 
-public class WordGuessedResponseData : UIUpdateData,IResponseData
+public enum TurnResult
 {
-    public TurnResult Result { get; set; }
-    public System.Collections.Generic.Dictionary<char, LetterResponseStatus> ResponseLetters { get; set; }
+    GoAgain,
+    TurnOver,
+    Win,
+    Loss
+}
+
+public class TurnTakenUpdate : UIUpdate, IResponseData
+{
+    [JsonPropertyName("letter_game_statuses")]
+    public System.Collections.Generic.Dictionary<string, LetterResponseStatus> LetterGameStatuses { get; set; }
     public List<string> WordLetterStatus { get; set; }
     public Dictionary ToDictionary()
     {
-        var responseLetters = new Godot.Collections.Dictionary<char, Godot.Collections.Dictionary<string, Variant>>();
-        foreach (var (letter, letterStatus) in ResponseLetters)
+        var responseLetters = new Godot.Collections.Dictionary<string, Godot.Collections.Dictionary<string, Variant>>();
+        foreach (var (letter, letterStatus) in LetterGameStatuses)
         {
             var keyboardStatus = (int)letterStatus.KeyboardStatus;
             Array<string> foundCoords = [];
@@ -38,23 +46,21 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
             wordLetterStatuses.Add(word);
         }
         var d = new Dictionary();
-        d["TurnResult"] = (int)Result;
         d["ResponseLetterStatus"] = responseLetters;
         d["WordLetterStatus"] = wordLetterStatuses;
 
         return d;
     }
     
-    public static WordGuessedResponseData FromDictionary(Dictionary data)
+    public static TurnTakenUpdate FromDictionary(Dictionary data)
     {
-        var result = new WordGuessedResponseData
+        var result = new TurnTakenUpdate
         {
-            Result = (TurnResult)(int)data["TurnResult"],
-            ResponseLetters = new System.Collections.Generic.Dictionary<char, LetterResponseStatus>()
+            LetterGameStatuses = new System.Collections.Generic.Dictionary<string, LetterResponseStatus>()
         };
 
         var responseLetters = (Dictionary)data["ResponseLetterStatus"];
-        foreach (char letter in responseLetters.Keys)
+        foreach (string letter in responseLetters.Keys)
         {
             var letterData = (Dictionary)responseLetters[letter];
             var keyboardStatus = (KeyboardLetterStatus)(int)letterData["keyboardStatus"];
@@ -79,7 +85,7 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
                 foundCoords.Add(letterFoundCoordinate);
             }
 
-            result.ResponseLetters[letter] = new LetterResponseStatus
+            result.LetterGameStatuses[letter] = new LetterResponseStatus
             {
                 KeyboardStatus = keyboardStatus,
                 UncoveredGameTiles = foundCoords
@@ -97,10 +103,10 @@ public class WordGuessedResponseData : UIUpdateData,IResponseData
     }
 }
 
-public class UncoveredTileData : IEventData, IResponseData
+public class UncoveredTileEvent : IUIEvent, IEventData, IResponseData
 {
-    public int Row;
-    public int Col;
+    public int Row { get; set; }
+    public int Col { get; set; }
     public Dictionary ToDictionary()
     {
         return new Dictionary()
@@ -110,14 +116,15 @@ public class UncoveredTileData : IEventData, IResponseData
         };
     }
 
-    public static UncoveredTileData FromDictionary(Dictionary data)
+    public static UncoveredTileEvent FromDictionary(Dictionary data)
     {
-        return new UncoveredTileData()
+        return new UncoveredTileEvent()
         {
             Row = (int)data["row"],
             Col = (int)data["col"],
         };
     }
+
 }
 
 public enum ResponseType
@@ -149,8 +156,8 @@ public class PlayingResponseData : IPlayingData
        var type = (ResponseType)(int)responseData["Type"];
        IResponseData data = type switch
        {
-           ResponseType.WordGuessed => WordGuessedResponseData.FromDictionary((Dictionary)responseData["Data"]),
-           ResponseType.TileUncovered => UncoveredTileResponse.FromDictionary((Dictionary)responseData["Data"]),
+           ResponseType.WordGuessed => TurnTakenUpdate.FromDictionary((Dictionary)responseData["Data"]),
+           // ResponseType.TileUncovered => UncoveredTileResponse.FromDictionary((Dictionary)responseData["Data"]),
            _ => throw new ArgumentOutOfRangeException()
        };
        return new PlayingResponseData()
@@ -161,9 +168,9 @@ public class PlayingResponseData : IPlayingData
     }
 }
 
-public class GuessedWordData : IResponseData, IEventData
+public class GuessedWordEvent : IUIEvent, IResponseData, IEventData
 {
-    public string Word;
+    public string Word { get; set; }
     public Dictionary ToDictionary()
     {
         return new Dictionary
@@ -172,10 +179,11 @@ public class GuessedWordData : IResponseData, IEventData
         };
     }
 
-    public static GuessedWordData FromDictionary(Dictionary data)
+    public static GuessedWordEvent FromDictionary(Dictionary data)
     {
-        return new GuessedWordData {Word = (string)data["Word"]};
+        return new GuessedWordEvent {Word = (string)data["Word"]};
     }
+
 }
 
 
@@ -271,10 +279,10 @@ public class PlayingEventData: IPlayingData
         var type = (EventType)(int)serialized["Type"];
         IEventData data = type switch
         {
-            EventType.GuessedWord => GuessedWordData.FromDictionary((Dictionary)serialized["Data"]),
-            EventType.UncoveredTile => UncoveredTileData.FromDictionary((Dictionary)serialized["Data"]),
+            EventType.GuessedWord => GuessedWordEvent.FromDictionary((Dictionary)serialized["Data"]),
+            EventType.UncoveredTile => UncoveredTileEvent.FromDictionary((Dictionary)serialized["Data"]),
             EventType.BackspacePressed => null,
-            EventType.KeyPressed => EventKeyPressedData.FromDictionary((Dictionary)serialized["Data"]),
+            EventType.KeyPressed => KeyPressedEvent.FromDictionary((Dictionary)serialized["Data"]),
             _ => throw new ArgumentOutOfRangeException()
         };
         return new PlayingEventData()
@@ -285,9 +293,15 @@ public class PlayingEventData: IPlayingData
     }
 }
 
-public class EventKeyPressedData : IEventData
+public class KeyPressedEvent : IUIEvent, IEventData
 {
-    public string Key;
+    [JsonPropertyName("key")]
+    public string Key { get; set; }
+
+public String ToString()
+    {
+        return $"key={Key}";
+    }
     public Dictionary ToDictionary()
     {
         return new Dictionary()
@@ -296,18 +310,19 @@ public class EventKeyPressedData : IEventData
         };
     }
 
-    public static EventKeyPressedData FromDictionary(Dictionary serialized)
+    public static KeyPressedEvent FromDictionary(Dictionary serialized)
     {
-        return new EventKeyPressedData()
+        return new KeyPressedEvent()
         {
             Key = (string)serialized["Key"],
         };
     }
+
 }
 
-[JsonDerivedType(typeof(EventKeyPressedData), typeDiscriminator: "EventKeyPressed")]
-[JsonDerivedType(typeof(GuessedWordData), typeDiscriminator: "GuessedWord")]
-[JsonDerivedType(typeof(UncoveredTileData), typeDiscriminator: "UncoveredTile")]
+[JsonDerivedType(typeof(KeyPressedEvent), typeDiscriminator: "EventKeyPressed")]
+[JsonDerivedType(typeof(GuessedWordEvent), typeDiscriminator: "GuessedWord")]
+[JsonDerivedType(typeof(UncoveredTileEvent), typeDiscriminator: "UncoveredTile")]
 public interface IEventData : IGodotSerializable
 {
 }

@@ -7,5 +7,8 @@
   <ItemGroup>
     <Folder Include="android\" />
     <Folder Include="scenes\" />
+    <Folder Include="src\Controllers\ScreenManager\Screens\Menu\Popups\" />
+    <Folder Include="src\Controllers\ScreenManager\Screens\Shared\Popups\" />
+    <Folder Include="src\Controllers\ScreenManager\Screens\Shared\UI\" />
   </ItemGroup>
 </Project>

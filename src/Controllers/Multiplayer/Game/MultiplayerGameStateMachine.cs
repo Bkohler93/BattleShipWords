@@ -22,7 +22,7 @@ public class MultiplayerGameManagerStateMachine
         TransitionTo(new SettingUp(_gameManager, this));
     }
 
-    public void ProcessLocalUpdate(UIEvent @event)
+    public void ProcessLocalUpdate(IUIEvent @event)
     {
         _currentState.ProcessLocalUpdate(@event);
     }
@@ -105,30 +105,28 @@ public class SettingUp : MultiplayerGameManagerState
             _peerFinishedSettingUp = true;
     }
 
-    public override void ProcessLocalUpdate(UIEvent @event)
+    public override void ProcessLocalUpdate(IUIEvent @event)
     {
-        if (@event.Type == EventType.SetupCompleted)
-        {
-            if (@event.Data is not SetupCompletedEventData data)
-                throw new Exception("MultiplayerGameManager::SettingUp::ProcessLocalUpdate: data is not SetupCompleteData");
-            _gameManager.PlayerTwoGameStateManager = RemoteGameStateManager.FromSetup(data.SelectedWords, data.SelectedGridCoordinates);
-            _gameManager.SendSetupComplete();
-
-            if (_peerFinishedSettingUp)
-            {
-                _completeSetup();
-                _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.SetupComplete);   
-            }
-            else
-            {
-                _finishedSettingUp = true;
-                _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.WaitingForOtherPlayer);   
-            }
-        }
-        else
-        {
-            throw new Exception("MultiplayerGameManager::SettingUp::ProcessLocalUpdate: received UIEvent of incorrect type");        
-        }
+        // if (@event.Type == EventType.SetupCompleted)
+        // {
+        //     // _gameManager.PlayerTwoGameStateManager = RemoteGameStateManager.FromSetup(data.SelectedWords, data.SelectedGridCoordinates);
+        //     _gameManager.SendSetupComplete();
+        //
+        //     if (_peerFinishedSettingUp)
+        //     {
+        //         _completeSetup();
+        //         _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.SetupComplete);   
+        //     }
+        //     else
+        //     {
+        //         _finishedSettingUp = true;
+        //         _gameManager.SetupUpdated?.Invoke(SetupSceneUpdate.WaitingForOtherPlayer);   
+        //     }
+        // }
+        // else
+        // {
+        //     throw new Exception("MultiplayerGameManager::SettingUp::ProcessLocalUpdate: received UIEvent of incorrect type");        
+        // }
     }
 
     private void _completeSetup()
@@ -204,26 +202,24 @@ public class OpponentPlayingState : MultiplayerGameManagerState
         }
     }
 
-    public override void ProcessLocalUpdate(UIEvent @event)
+    public override void ProcessLocalUpdate(IUIEvent @event)
     {
-        switch (@event.Type)
+        switch (@event) 
         {
-            case EventType.SetupCompleted:
-                GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - ProcessLocalUpdate received SetupCompleted event.");
+            // case EventType.SetupCompleted:
+            case GuessedWordEvent _:
                 break;
-            case EventType.GuessedWord:
+            case UncoveredTileEvent _:
                 break;
-            case EventType.UncoveredTile:
-                break;
-            case EventType.KeyPressed:
-                var data = (@event.Data as EventKeyPressedData);
-                GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
-                _gameManager.UpdateLocalUI(new UIUpdate
-                {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData(data.Key), 
-                });
-                _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
+            case KeyPressedEvent _:
+                // var data = (@event.Data as EventKeyPressedData);
+                // GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
+                // _gameManager.UpdateLocalUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.KeyPressed,
+                //     Data = new KeyPressedResponse(data.Key), 
+                // });
+                // _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -237,54 +233,75 @@ public class OpponentPlayingState : MultiplayerGameManagerState
         {
             case EventType.BackspacePressed:
             {
-                _gameManager.UpdateOpponentUI(new UIUpdate
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                    // Type = UIUpdateType.KeyPressed,
+                    // Data = new KeyPressedResponse("backspace") 
+                // });
+                _gameManager.UpdateOpponentUI(new KeyPressedUpdate
                 {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData("backspace") 
+                    Key ="backspace" 
                 });
                 break;
             }
             case EventType.KeyPressed:
             {
-                if (eventData.Data is not EventKeyPressedData keyPressedData)
+                if (eventData.Data is not KeyPressedEvent keyPressedData)
                     throw new Exception("OpponentPlayingState: invalid KeyPressed Data received in _processEvent");
-                _gameManager.UpdateOpponentUI(new UIUpdate
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.KeyPressed,
+                //     Data = new KeyPressedResponse(keyPressedData.Key) 
+                // });
+                _gameManager.UpdateOpponentUI(new KeyPressedUpdate
                 {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData(keyPressedData.Key) 
+                    Key = keyPressedData.Key 
                 });
                 break;
             }
             case EventType.GuessedWord:
             {
-                if (eventData.Data is not GuessedWordData guessedWordData)
+                if (eventData.Data is not GuessedWordEvent guessedWordData)
                     throw new Exception("OpponentPlayingState: invalid WordGuess Data received in _processEvent");
                 var res = _processWordGuess(guessedWordData.Word);
                 _gameManager.SendPlayingResponse(ResponseType.WordGuessed, res);
-                _gameManager.UpdateOpponentUI(new UIUpdate
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.GuessedWord,
+                //     Data = res, 
+                // });
+                _gameManager.UpdateOpponentUI(new TurnTakenUpdate
                 {
-                    Type = UIUpdateType.GuessedWord,
-                    Data = res, 
+                    // Result = res.Result,
+                    LetterGameStatuses = res.LetterGameStatuses,
+                    WordLetterStatus = res.WordLetterStatus 
                 });
-                result = res.Result;
-                if (res.Result == TurnResult.TurnOver)
-                    _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
-                else if (res.Result == TurnResult.Win)
-                    _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, false));
+                // result = res.Result;
+                // if (res.Result == TurnResult.TurnOver)
+                //     _stateMachine.TransitionTo(new PlayingState(_stateMachine, _gameManager));
+                // else if (res.Result == TurnResult.Win)
+                //     _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, false));
                 break; 
             }
             case EventType.UncoveredTile:
             {
-                if (eventData.Data is not UncoveredTileData uncoveredTileData)
+                if (eventData.Data is not UncoveredTileEvent uncoveredTileData)
                     throw new Exception("OpponentPlayingState: invalid UncoverTile Data received in _processEvent");
-                var res = _processUncoverTile(uncoveredTileData.Row, uncoveredTileData.Col);
-                _gameManager.SendPlayingResponse(ResponseType.TileUncovered, res);
-                _gameManager.UpdateOpponentUI(new UIUpdate
-                {
-                    Type = UIUpdateType.UncoveredTile,
-                    Data = res 
-                });
-                result = res.Result;
+                // var res = _processUncoverTile(uncoveredTileData.Row, uncoveredTileData.Col);
+                // _gameManager.SendPlayingResponse(ResponseType.TileUncovered, res);
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.UncoveredTile,
+                //     Data = res 
+                // });
+                // _gameManager.UpdateOpponentUI(new UncoveredTileResponse
+                // {
+                //     WordLetterStatus = res.WordLetterStatus,
+                //     GameboardTileStatus = res.GameboardTileStatus,
+                //     KeyboardStatus = res.KeyboardStatus,
+                //     Result =res.Result 
+                // });
+                // result = res.Result;
                 break;
             }
         }
@@ -307,32 +324,26 @@ public class OpponentPlayingState : MultiplayerGameManagerState
         }
     }
 
-    private UncoveredTileResponse _processUncoverTile(int row, int col)
-    {
-        var res = _gameManager.PlayerTwoGameStateManager.ProcessTileUncovered(row, col);
-        return res;
-    }
+    // private UncoveredTileResponse _processUncoverTile(int row, int col)
+    // {
+    //     var res = _gameManager.PlayerTwoGameStateManager.ProcessTileUncovered(row, col);
+    //     return res;
+    // }
 
-    private WordGuessedResponseData _processWordGuess(string word)
+    private TurnTakenUpdate _processWordGuess(string word)
     {
         var res = _gameManager.PlayerTwoGameStateManager.ProcessWordGuess(word);
 
-        var data = new WordGuessedResponseData()
+        var data = new TurnTakenUpdate()
         {
-            Result = res.Result,
-            ResponseLetters = res.ResponseLetters,
+            // Result = res.Result,
+            LetterGameStatuses = res.ResponseLetters,
             WordLetterStatus = res.WordLetterStatus,
         };
         return data;
     }
 }
 
-public enum TurnResult
-{
-    GoAgain,
-    TurnOver,
-    Win
-}
 
 public class PlayingState : MultiplayerGameManagerState
 {
@@ -374,21 +385,21 @@ public class PlayingState : MultiplayerGameManagerState
                     break;
                 case PlayingDataType.Response:
                     var respData = playingData.Data as PlayingResponseData;
-                    var result = _processResponse(respData);
-                    if (result == null) break;
-                    switch (result)
-                    {
-                        case TurnResult.GoAgain:
-                            break;
-                        case TurnResult.TurnOver:
-                            _stateMachine.TransitionTo(new OpponentPlayingState(_gameManager, _stateMachine));
-                            break;
-                        case TurnResult.Win:
-                            _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, true));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    // var result = _processResponse(respData);
+                    // if (result == null) break;
+                    // switch (result)
+                    // {
+                    //     case TurnResult.GoAgain:
+                    //         break;
+                    //     case TurnResult.TurnOver:
+                    //         _stateMachine.TransitionTo(new OpponentPlayingState(_gameManager, _stateMachine));
+                    //         break;
+                    //     case TurnResult.Win:
+                    //         _stateMachine.TransitionTo(new GameOverState(_stateMachine, _gameManager, true));
+                    //         break;
+                    //     default:
+                    //         throw new ArgumentOutOfRangeException();
+                    // }
                     break;
             }
         }
@@ -399,32 +410,32 @@ public class PlayingState : MultiplayerGameManagerState
 
     }
 
-    public override void ProcessLocalUpdate(UIEvent @event)
+    public override void ProcessLocalUpdate(IUIEvent @event)
     {
-        switch (@event.Type)
-        {
-            case EventType.SetupCompleted:
-                GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - ProcessLocalUpdate received SetupCompleted event.");
-                break;
-            case EventType.GuessedWord:
-                _gameManager.SendPlayingEvent(@event.Type, @event.Data as GuessedWordData);
-                break;
-            case EventType.UncoveredTile:
-                _gameManager.SendPlayingEvent(@event.Type, @event.Data as UncoveredTileData);
-                break;
-            case EventType.KeyPressed:
-                var data = (@event.Data as EventKeyPressedData);
-                GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
-                _gameManager.UpdateLocalUI(new UIUpdate
-                {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData(data.Key), 
-                });
-                _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        // switch (@event.Type)
+        // {
+        //     case EventType.SetupCompleted:
+        //         GD.PrintErr($"MultiplayerGameStateMachine::PlayingState - ProcessLocalUpdate received SetupCompleted event.");
+        //         break;
+        //     case EventType.GuessedWord:
+        //         // _gameManager.SendPlayingEvent(@event.Type, @event.Data as GuessedWordData);
+        //         break;
+        //     case EventType.UncoveredTile:
+        //         // _gameManager.SendPlayingEvent(@event.Type, @event.Data as UncoveredTileData);
+        //         break;
+        //     case EventType.KeyPressed:
+        //         // var data = (@event.Data as EventKeyPressedData);
+        //         // GD.Print($"ProcessLocalUpdate: KeyPressed={data.Key}");
+        //         // _gameManager.UpdateLocalUI(new UIUpdate
+        //         // {
+        //         //     Type = UIUpdateType.KeyPressed,
+        //         //     Data = new KeyPressedResponse(data.Key), 
+        //         // });
+        //         // _gameManager.SendPlayingEvent(@event.Type, @event.Data as EventKeyPressedData);
+        //         break;
+        //     default:
+        //         throw new ArgumentOutOfRangeException();
+        // }
     }
 
     public override void ReconnectFailed()
@@ -443,22 +454,22 @@ public class PlayingState : MultiplayerGameManagerState
         {
             case EventType.BackspacePressed:
             {
-                _gameManager.UpdateOpponentUI(new UIUpdate
-                {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData("backspace") 
-                });
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.KeyPressed,
+                //     Data = new KeyPressedResponse("backspace") 
+                // });
                 break;
             }
             case EventType.KeyPressed:
             {
-                if (eventData.Data is not EventKeyPressedData keyPressedData)
+                if (eventData.Data is not KeyPressedEvent keyPressedData)
                     throw new Exception("OpponentPlayingState: invalid KeyPressed Data received in _processEvent");
-                _gameManager.UpdateOpponentUI(new UIUpdate
-                {
-                    Type = UIUpdateType.KeyPressed,
-                    Data = new KeyData(keyPressedData.Key) 
-                });
+                // _gameManager.UpdateOpponentUI(new UIUpdate
+                // {
+                //     Type = UIUpdateType.KeyPressed,
+                //     Data = new KeyPressedResponse(keyPressedData.Key) 
+                // });
                 break;
             }
             case EventType.GuessedWord:
@@ -470,106 +481,109 @@ public class PlayingState : MultiplayerGameManagerState
         }
     }
 
-    private TurnResult? _processResponse(PlayingResponseData respData)
-    {
-        TurnResult result;
-        if (respData.Type == ResponseType.WordGuessed)
-        {
-            var wordGuessData = respData.Data as WordGuessedResponseData;
-            result = wordGuessData.Result;
-            _gameManager.UpdateLocalUI(new UIUpdate
-            {
-                Type = UIUpdateType.GuessedWord,
-                Data = wordGuessData
-            });
-            // _gameManager.UpdateLocalGameFromWordGuess(wordGuessData);
-        }
-        else if (respData.Type == ResponseType.TileUncovered)
-        {
-            var uncoverTileData = respData.Data as UncoveredTileResponse;
-            result = uncoverTileData.Result;
-            _gameManager.UpdateLocalUI(new UIUpdate
-            {
-                Type = UIUpdateType.UncoveredTile,
-                Data = uncoverTileData,
-            });
-            // _gameManager.UpdateLocalFromUncoverTile(uncoverTileData);
-        }
-        else
-        {
-            GD.PrintErr("MultiplayerGameStateMachine::PlayingState:_processResponse processed invalid TurnResult");
-            result = TurnResult.TurnOver;
-        }
-
-        return result;
-    }
+    // private TurnResult? _processResponse(PlayingResponseData respData)
+    // {
+    //     TurnResult result;
+    //     if (respData.Type == ResponseType.WordGuessed)
+    //     {
+    //         var wordGuessData = respData.Data as TurnTakenResponse;
+    //         result = wordGuessData.Result;
+    //         // _gameManager.UpdateLocalUI(new UIUpdate
+    //         // {
+    //         //     Type = UIUpdateType.GuessedWord,
+    //         //     Data = wordGuessData
+    //         // });
+    //         // _gameManager.UpdateLocalGameFromWordGuess(wordGuessData);
+    //     }
+    //     else if (respData.Type == ResponseType.TileUncovered)
+    //     {
+    //         // var uncoverTileData = respData.Data as UncoveredTileResponse;
+    //         // result = uncoverTileData.Result;
+    //         // _gameManager.UpdateLocalUI(new UIUpdate
+    //         // {
+    //         //     Type = UIUpdateType.UncoveredTile,
+    //         //     Data = uncoverTileData,
+    //         // });
+    //         // _gameManager.UpdateLocalFromUncoverTile(uncoverTileData);
+    //     }
+    //     else
+    //     {
+    //         GD.PrintErr("MultiplayerGameStateMachine::PlayingState:_processResponse processed invalid TurnResult");
+    //         result = TurnResult.TurnOver;
+    //     }
+    //
+    //     // return result;
+    // }
 }
 
-public class UncoveredTileResponse : UIUpdateData, IResponseData 
-{
-    public List<string> WordLetterStatus;
-    public List<(int row, int col, string letter, GameTileStatus status)> GameboardStatus;
-    public System.Collections.Generic.Dictionary<char, KeyboardLetterStatus> KeyboardStatus;
-    public TurnResult Result;
-    
-    public Dictionary ToDictionary()
-    {
-        Array<string> wordLetterStatus = [];
-        foreach (var word in WordLetterStatus)
-        {
-            wordLetterStatus.Add(word);
-        }
-
-        Godot.Collections.Dictionary<char, int> keyboardStatus = new();
-        foreach (var (letter, status) in KeyboardStatus)
-        {
-            keyboardStatus[letter] = (int)status;
-        }
-
-        Array<string> gameboardStatus = [];
-        foreach (var (row, col, letter, status) in GameboardStatus)
-        {
-            gameboardStatus.Add($"{row},{col},{letter},{(int)status}");
-        }
-        
-        return new Dictionary()
-        {
-            {"GameboardStatus", gameboardStatus},
-            {"KeyboardStatus", keyboardStatus},
-            {"WordLetterStatus", wordLetterStatus},
-            { "TurnResult", (int)Result}
-        };
-    }
-
-    public static UncoveredTileResponse FromDictionary(Dictionary dictionary)
-    {
-        var wordLetterStatus = ((Array<string>)dictionary["WordLetterStatus"]).ToList();
-        var keyboardStatus = new System.Collections.Generic.Dictionary<char, KeyboardLetterStatus>();
-        foreach (var (letter, status) in (Godot.Collections.Dictionary<char, int>)dictionary["KeyboardStatus"])
-        {
-            keyboardStatus[letter] = (KeyboardLetterStatus)status;
-        }
-
-        var gameboardStatus = new List<(int row, int col, string letter, GameTileStatus status)>();
-        foreach (var status in (Array<string>)dictionary["GameboardStatus"])
-        {
-            var parts = status.Split(',');
-            var row = int.Parse(parts[0]);
-            var col = int.Parse(parts[1]);
-            var letter = parts[2];
-            var tileStatus = (GameTileStatus)int.Parse(parts[3]);
-            gameboardStatus.Add((row, col, letter, tileStatus));
-        }
-
-        return new UncoveredTileResponse()
-        {
-            WordLetterStatus = wordLetterStatus,
-            GameboardStatus = gameboardStatus,
-            KeyboardStatus = keyboardStatus,
-            Result = (TurnResult)((int)dictionary["TurnResult"]),
-        };
-    }
-}
+// public class UncoveredTileResponse : UIUpdate, IResponseData 
+// {
+//     public List<string> WordLetterStatus;
+//     // public List<(int row, int col, string letter, GameTileStatus status)> GameboardStatus;
+//     public List<LetterResponseStatus> GameboardTileStatus;
+//     public System.Collections.Generic.Dictionary<char, KeyboardLetterStatus> KeyboardStatus;
+//     public TurnResult Result;
+//     
+//     public Dictionary ToDictionary()
+//     {
+//         Array<string> wordLetterStatus = [];
+//         foreach (var word in WordLetterStatus)
+//         {
+//             wordLetterStatus.Add(word);
+//         }
+//
+//         Godot.Collections.Dictionary<char, int> keyboardStatus = new();
+//         foreach (var (letter, status) in KeyboardStatus)
+//         {
+//             keyboardStatus[letter] = (int)status;
+//         }
+//
+//         Array<string> gameboardStatus = [];
+//         foreach (var (row, col, letter, status) in GameboardTileStatus)
+//         {
+//             gameboardStatus.Add($"{row},{col},{letter},{(int)status}");
+//         }
+//         
+//         return new Dictionary()
+//         {
+//             {"GameboardStatus", gameboardStatus},
+//             {"KeyboardStatus", keyboardStatus},
+//             {"WordLetterStatus", wordLetterStatus},
+//             { "TurnResult", (int)Result}
+//         };
+//     }
+//
+//     public static UncoveredTileResponse FromDictionary(Dictionary dictionary)
+//     {
+//         var wordLetterStatus = ((Array<string>)dictionary["WordLetterStatus"]).ToList();
+//         var keyboardStatus = new System.Collections.Generic.Dictionary<char, KeyboardLetterStatus>();
+//         foreach (var (letter, status) in (Godot.Collections.Dictionary<char, int>)dictionary["KeyboardStatus"])
+//         {
+//             keyboardStatus[letter] = (KeyboardLetterStatus)status;
+//         }
+//
+//         var gameboardStatus = new List<(int row, int col, string letter, GameTileStatus status)>();
+//         foreach (var status in (Array<string>)dictionary["GameboardStatus"])
+//         {
+//             var parts = status.Split(',');
+//             var row = int.Parse(parts[0]);
+//             var col = int.Parse(parts[1]);
+//             var letter = parts[2];
+//             var tileStatus = (GameTileStatus)int.Parse(parts[3]);
+//             gameboardStatus.Add((row, col, letter, tileStatus));
+//         }
+//
+//         return new UncoveredTileResponse()
+//         {
+//             WordLetterStatus = wordLetterStatus,
+//             GameboardTileStatus = gameboardStatus,
+//             KeyboardStatus = keyboardStatus,
+//             Result = (TurnResult)((int)dictionary["TurnResult"]),
+//         };
+//     }
+//
+//     public override UIUpdateType Type => UIUpdateType.UncoveredTile; 
+// }
 
 public class GameOverState : MultiplayerGameManagerState
 {
@@ -615,7 +629,7 @@ public class GameOverState : MultiplayerGameManagerState
         throw new NotImplementedException();
     }
 
-    public override void ProcessLocalUpdate(UIEvent @event)
+    public override void ProcessLocalUpdate(IUIEvent @event)
     {
         throw new NotImplementedException();
     }
@@ -647,5 +661,5 @@ public abstract class MultiplayerGameManagerState:IP2PConnectionListener
         throw new NotImplementedException($"{GetType().Name} does not implement Receive");
     }
 
-    public abstract void ProcessLocalUpdate(UIEvent @event);
+    public abstract void ProcessLocalUpdate(IUIEvent @event);
 }
